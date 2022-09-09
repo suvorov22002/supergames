@@ -15,6 +15,7 @@ public class KenoRes implements Serializable {
 	private String multiplicateur;
 	private int gameState;
 	private String str_draw_combi = "";
+	private int bonuscod;
 	
 	public KenoRes() { 
 		super();
@@ -74,6 +75,14 @@ public class KenoRes implements Serializable {
 
 	public void setStr_draw_combi(String str_draw_combi) {
 		this.str_draw_combi = str_draw_combi;
+	}
+	
+	public int getBonuscod() {
+		return bonuscod;
+	}
+
+	public void setBonuscod(int bonuscod) {
+		this.bonuscod = bonuscod;
 	}
 	
 }

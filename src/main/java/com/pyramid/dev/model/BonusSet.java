@@ -18,6 +18,7 @@ public class BonusSet implements Serializable{
 	private String coderace;
 	private Long barcode;
 	private Long mise;
+	private int numk;
 	
 	public BonusSet() {
 		super();
@@ -69,6 +70,14 @@ public class BonusSet implements Serializable{
 
 	public void setMise(Long mise) {
 		this.mise = mise;
+	}
+
+	public int getNumk() {
+		return numk;
+	}
+
+	public void setNumk(int numk) {
+		this.numk = numk;
 	}
 	
 	

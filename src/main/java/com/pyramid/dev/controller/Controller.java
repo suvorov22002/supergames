@@ -1067,10 +1067,10 @@ public class Controller {
 				  	System.out.println("[FINISH DRAW STEP 4] "+cds.isMiseAjour());
 				  	supermanager.endDraw(cds.getDrawNumk(), cds.getPartner());
 				  	
-				  	if (!Utile.ref.alive()) {
-				  		Utile.ref = new RefreshK(cds,cds.getPartner(),applicationContext);
-				  		Utile.ref.start();
-				  	}
+//				  	if (!Utile.ref.alive()) {
+//				  		Utile.ref = new RefreshK(cds,cds.getPartner(),applicationContext);
+//				  		Utile.ref.start();
+//				  	}
 			  }
 			 ob.put("state", cds.getGameState());
 			 String eve = Utile.convertJsonToString(ob);
@@ -1084,7 +1084,7 @@ public class Controller {
 	@GetMapping("search-bonus/{coderace}")
 	public Response searchBonus(@PathVariable("coderace") String coderace) {
 		 ControlDisplayKeno cds = Utile.display_draw.get(coderace);
-		 System.out.println("searchBonus finish");
+		// System.out.println("searchBonus finish");
 		 BonusSet bs = new BonusSet();
 		 bs.setBonusk(cds.getBonus());
 		 bs.setCode(cds.getBonuskcode());
@@ -1093,7 +1093,7 @@ public class Controller {
 		 System.out.println("getBarcodeCagnot------------: "+cds.getBarcodeCagnot());
 		 bs.setBarcode(cds.getBarcodeCagnot());
 		 bs.setMise(cds.getMiseCagnot());
-		 
+		 bs.setNumk(cds.getDrawNumk());
 		 return Response.ok(BonusSetDTO.getInstance().event(bs).sucess("")).build();
 	}
 	
@@ -1834,6 +1834,40 @@ public class Controller {
 			e.printStackTrace();
 			return Response.ok(ResponseData.getInstance().error(e.getMessage())).build();
 		 }
+	}
+	
+	@GetMapping("bonus/{coderace}")
+	public Response getBonus(@PathVariable("coderace") Long coderace) {
+		JSONObject ob = new JSONObject(); 
+		
+		 try {
+			 Partner p = null;
+			 p = partnerservice.findById(coderace);
+			 if (p == null ) return Response.ok(ResponseData.getInstance().error("")).build();
+			 
+			 List<Keno> lm = kenoservice.getLastKBonus(p);
+			 List<KenoRes> lknr = new ArrayList<>(lm.size());
+			 KenoRes kenr = new KenoRes();
+			 for (Keno k : lm) {
+				 kenr = new KenoRes();
+				 kenr.setBonuscod(k.getBonusKcod());
+				 kenr.setBonusKamount(k.getBonusKamount());
+				 kenr.setHeureTirage(k.getHeureTirage());
+				 kenr.setDrawnumbK(k.getDrawnumbK());
+				 kenr.setDrawnumK(k.getDrawnumK());
+				 kenr.setMultiplicateur(k.getMultiplicateur());
+				 lknr.add(kenr);
+			 }
+			 
+			 ob.put("bonus", lknr);
+			 String eve = Utile.convertJsonToString(ob);
+			 return Response.ok(ResponseData.getInstance().event(eve).sucess("")).build();
+		 } catch (Exception e) {
+			e.printStackTrace();
+			return Response.ok(ResponseData.getInstance().error(e.getMessage())).build();
+		 }
+		 
+		
 	}
 	
 //	 //The function receives a GET request, processes it and gives back a list of Todo as a response.
