@@ -1,11 +1,9 @@
 package com.pyramid.dev;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +20,7 @@ import com.pyramid.dev.model.Cagnotte;
 import com.pyramid.dev.model.Caissier;
 import com.pyramid.dev.model.Config;
 import com.pyramid.dev.model.GameCycle;
+import com.pyramid.dev.model.Groupe;
 import com.pyramid.dev.model.Keno;
 import com.pyramid.dev.model.Mouvement;
 import com.pyramid.dev.model.Partner;
@@ -30,10 +29,10 @@ import com.pyramid.dev.service.CagnotteService;
 import com.pyramid.dev.service.CaissierService;
 import com.pyramid.dev.service.ConfigService;
 import com.pyramid.dev.service.GameCycleService;
+import com.pyramid.dev.service.GroupeService;
 import com.pyramid.dev.service.KenoService;
 import com.pyramid.dev.service.MouvementService;
 import com.pyramid.dev.service.PartnerService;
-import com.pyramid.dev.tools.CagnotWorker;
 import com.pyramid.dev.tools.ControlDisplayKeno;
 import com.pyramid.dev.tools.Utile;
 
@@ -67,9 +66,8 @@ public class InitialKeno {
 	@Autowired
 	ApplicationContext applicationContext;
 	
-	
-	
-	
+	@Autowired
+	GroupeService grpeservice;
 	
 	@Autowired
 	static SuperGameManager supergmanager;
@@ -83,6 +81,23 @@ public class InitialKeno {
 		
 		List<Partner> partners = partnerservice.getAllPartners();
 		System.out.println("[INITIAL KENO - ALL]: "+partners.size());
+		
+		if (partners.isEmpty()) {
+			Groupe grpe = new Groupe();
+			grpe.setIdGroupe(0L);
+			grpe.setNomgroupe("ramatbet");
+			grpe.setState("ramatbet");
+			grpe.setZone("ramatbet");
+			grpeservice.create(grpe);
+			
+			Partner p = new Partner();
+			p.setCoderace("ramatbet");
+			p.setActif(1);
+			p.setGroupe(grpe);
+			p.setZone("yaounde");
+			p.setIdpartner(1L);
+			partnerservice.create(p);
+		}
 //		RefreshK ref = new RefreshK();
 //		ref.start();
 		

@@ -18,7 +18,7 @@ public class QueryHelper {
 	public static final String SQL_U_DRAW_END = "Update Keno Set started=1 Where drawnumK >:drawnum and partner=:coderace and multiplicateur != '0'";
 	public static final String SQL_F_ID = "Select idKeno FROM Keno where partner=:coderace AND drawnumk=:drawnum";
 	public static final String SQL_U_KENO_BONUS = "Update Keno Set bonusKamount=:bonusamount , bonusKcod=:bonuscode Where idKeno=:idKeno " ; 
-	public static final String SQL_F_PREVIOUS_BONUS = "From keno where bonusKcod !=0 and partner=:coderace "
+	public static final String SQL_F_PREVIOUS_BONUS = "From Keno where bonusKcod !=0 and partner=:coderace "
 			+ "Order By idKeno Desc ";	
 	public static final String SQL_F_SUM_BONUS = "SELECT sum( bonusKamount ) FROM Keno WHERE idKeno >:idkeno AND idKeno <=:idkeno1 and partner=:coderace ";
 	public static final String SQL_F_PREVIOUS_TWEL_DRAW = "FROM Keno"

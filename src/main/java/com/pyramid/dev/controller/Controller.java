@@ -1852,10 +1852,11 @@ public class Controller {
 				 kenr = new KenoRes();
 				 kenr.setBonuscod(k.getBonusKcod());
 				 kenr.setBonusKamount(k.getBonusKamount());
-				 kenr.setHeureTirage(k.getHeureTirage());
+				 kenr.setHeureTirage(k.getHeureTirage().replace(':', 'h').replace(',', '-'));
 				 kenr.setDrawnumbK(k.getDrawnumbK());
 				 kenr.setDrawnumK(k.getDrawnumK());
 				 kenr.setMultiplicateur(k.getMultiplicateur());
+				 kenr.setStr_draw_combi(k.getDrawnumbK());
 				 lknr.add(kenr);
 			 }
 			 
