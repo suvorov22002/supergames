@@ -263,6 +263,7 @@ public class MisekDAOImpl implements MisekDAO {
 
 	@Override
 	public List<Misek> searchMiseKdraw(Keno keno, int num) throws DAOException {
+		System.out.println("NUM: "+keno.getDrawnumK()+" = "+num);
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Misek> query = currentSession.createQuery(QueryHelper.SQL_F_MISEK_DRAWNUMK, Misek.class);
 		query.setParameter("drawnumk", num)

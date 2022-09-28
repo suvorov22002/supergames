@@ -55,6 +55,7 @@ import com.pyramid.dev.model.Profil;
 import com.pyramid.dev.model.ResponseData;
 import com.pyramid.dev.model.ShiftDay;
 import com.pyramid.dev.model.Versement;
+import com.pyramid.dev.responsecode.ResponseHolder;
 import com.pyramid.dev.service.AirtimeService;
 import com.pyramid.dev.service.CagnotteService;
 import com.pyramid.dev.service.CaissierService;
@@ -397,21 +398,13 @@ public class Controller {
 		 
 		 try {
 			 //recherche du ticket dans miset
-			// System.out.println("Controler "+barcode);
+			 System.out.println("Controler "+barcode);
+			 barcode = barcode.length() == 13 ? barcode.substring(0, 12) : barcode;
 			 Miset miset = mstservice.searchTicketT(barcode);
+			 System.out.println("MISET: "+miset);
+			// ticket non existant
 			 if(miset == null) {
-				 return Response.ok(BetTicketKDTO.getInstance().error("TICKET INCONNU")).build();
-			 }
-			 
-			 //verifie si ticket deja payé
-		//	 System.out.println("controller-already paid "+miset.getIdMiseT());
-			 Versement vers = verservice.find_vers_miset(miset.getIdMiseT());
-		//	 System.out.println("controller-already vers "+vers);
-			 if(vers != null) {
-				// System.out.println("controller-already vers "+vers.getMise());
-			     BetTicketK b = new BetTicketK();
-			     b.setVers(vers);
-				 return Response.ok(BetTicketKDTO.getInstance().event(b).sucess("").error("TICKET ALREADY PAID")).build();
+				 return Response.ok(BetTicketKDTO.getInstance().error(ResponseHolder.TCKINCON)).build();
 			 }
 			 
 			 //le ticket est en attente de traitement
@@ -428,32 +421,43 @@ public class Controller {
 		      		mk = mskservice.searchMisesK(miset);
 		      	//	 System.out.println("Controler - mk "+mk);
 		      		if(mk != null) {
-		      			int draw_numK;
-		      			int multi = 1;
-		      		    boolean multiple = false;
-		      		    int num_draw;
+		      			
+		      		    //verification si ticket partenaire
+		      			Partner p = partnerservice.find(mk.getCaissier().getPartner());
+		      		
+		      			int draw_numK, num_draw,xmulti, multi = 1;
+		      			double xtiplicateur = 1;
+		      		    boolean multiple = false, eval;
 		      		    Keno k_keno = null;
 		      		    Cagnotte cagnot = null;
-		      		    String result = "";
-		    		    String single_result="";
-		    		    String str0="",str1="";
-		    		    String result_multi;
-		    		    double xtiplicateur = 1;
+		      		    String result = "",single_result="",str0="",str1="",result_multi;
 		    		    String[] str_result;
 		    		    EffChoicek tick = new EffChoicek();
 		    		    List<EffChoicek> list_efchk = new ArrayList<EffChoicek>();
 			    		List<String> resultMulti  = new ArrayList<String>();
 		      		  
-		      			//verification si ticket partenaire
-		      			Partner p = partnerservice.find(mk.getCaissier().getPartner());
-		      			if(p.getCoderace().equalsIgnoreCase(coderace)) {
-		      				int xmulti = mk.getXmulti();
+		      			
+		      			if(coderace.equalsIgnoreCase(p.getCoderace())) {
+		      				
+		      			    //verifie si ticket deja payé
+		      				 Versement vers = verservice.find_vers_miset(miset.getIdMiseT());
+		      				 if(vers != null) {
+		      					 System.out.println("controller-already vers "+vers.getMise());
+		      				     BetTicketK b = new BetTicketK();
+		      				     b.setVers(vers);
+		      					 return Response.ok(BetTicketKDTO.getInstance().event(b).sucess("").error(ResponseHolder.TCKALRPAID)).build();
+		      				 }
+		      				 
+		      				// Ticket reconnu et correct - Traitement.
+		      				 
+		      				xmulti = mk.getXmulti();
 							bonusTicketCode = mk.getBonusCod();
+							
 							//on recupere les evenements du ticket
 							ticket = efkservice.searchTicketK(mk);
-						//	 System.out.println("Controler - ticket "+ticket.size());
+							System.out.println("Controler - ticket "+ticket.size());
 							
-							if( ticket.size() > 0 ){
+							if( !ticket.isEmpty() ){
 								
 								 betk.setCotejeu(Double.parseDouble(ticket.get(0).getCote()));
 								 betk.setBarcode(barcode);
@@ -468,27 +472,34 @@ public class Controller {
 					    		 Keno _keno = kenoservice.find_Max_draw(p);
 					    		 draw_numK = _keno.getDrawnumK();
 					    		 
-					    		 Misek_temp misektp = mstpservice.find(mk.getIdMiseK());
-					    		 if(misektp != null) {
-					    			 multi = misektp.getMulti();
-					    		 }
+//					    		 Misek_temp misektp = mstpservice.find(mk.getIdMiseK());
+//					    		 if(misektp != null) {
+//					    			 multi = misektp.getMulti();
+//					    		 }
+					    		 multi = ticket.size();
 					    		 
 					    		 multiple = multi > 1 ? true : false; 
 					    		 
 					    		 num_draw = mskservice.getNumDraw(mk);
-					    	//	 System.out.println("Controler - num_draw "+num_draw);
+					    		// System.out.println("Controler - num_draw "+num_draw);
 				    			 betk.setDrawnumk(num_draw);
 				    			 int num_tirage_final = num_draw + multi - 1;
+				    			 System.out.println("Numero tirage final: "+num_tirage_final);
+				    			 
+				    	// Recherche du resultat des differents elements
+				    			 eval = true; //controle si le tirage a deja eu lieu
 				    			 
 					    		 for(int i=0;i< multi;i++){
 					    			int num = i + num_draw;
 					    			
 					    			k_keno = kenoservice.searchResultK(num, p);
 					    			cagnot = cagnotservice.find(p);
+					    			
+					    			tick = ticket.get(i);
+				    				tick.setImisek(mk.getIdMiseK());
 					    		
 					    			if(k_keno != null){
-					    				tick = ticket.get(i);
-					    				tick.setImisek(mk.getIdMiseK());
+					    				
 					    				
 					    				bonusWinAmount = k_keno.getBonusKamount();
 					    				if(bonusWinAmount != 0) {
@@ -562,33 +573,53 @@ public class Controller {
 								    		
 					    				}
 					    				else {
-					    					//to implements
-					    					tick.setDrawresult(null);
+					    					
+					    					eval = false;
+					    					tick.setDrawresult(" ");
 					    					tick.setDrawnum(num);
+					    					tick.setIdkeno(k_keno.getIdKeno());
 					    					list_efchk.add(tick);
 					    				}
 					    			}
 					    			else {
-					    				betk.setList_efchk(list_efchk);
-					    				return Response.ok(BetTicketKDTO.getInstance().event(betk).error("TICKET INCONNU").sucess("")).build();
+					    				// Tirage pas encore déroulé
+					    				eval = false;
+					    				
+					    				tick.setDrawresult(" ");
+				    					tick.setDrawnum(num);
+				    					list_efchk.add(tick);
+				    				
+					    				//betk.setList_efchk(list_efchk);
+					    				//return Response.ok(BetTicketKDTO.getInstance().event(betk).error(ResponseHolder.TCKNEVAL)).build();
 					    			}
 					    			
 					    		 }
 					    		 
 					    		 betk.setList_efchk(list_efchk);
-								 return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("")).build();
+					    		 if (eval) {
+					    			 return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("")).build();
+					    		 }
+					    		 else {
+					    			 //return Response.ok(BetTicketKDTO.getInstance().event(betk).error(ResponseHolder.TCKNEVAL)).build();
+					    			 return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("").error(ResponseHolder.TCKNEVAL)).build();
+					    		 }
+								 
 							}
 							else {
-								return Response.ok(BetTicketKDTO.getInstance().error("TICKET CHOIX ERROR")).build();
+								//return Response.ok(BetTicketKDTO.getInstance().error(ResponseHolder.TCKCHXERR)).build();
+								return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("").error(ResponseHolder.TCKCHXERR)).build();
 							}
 		      			}
 		      			else {
-		      				return Response.ok(BetTicketKDTO.getInstance().error("TICKET NON RECONNU")).build();
+		      				// Mauvais partenaire
+		      				//return Response.ok(BetTicketKDTO.getInstance().error(ResponseHolder.TCKNRECON)).build();
+		      				return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("").error(ResponseHolder.TCKNRECON)).build();
 		      			}
 		      			
 		      		}
 		      		else {
-		      			return Response.ok(BetTicketKDTO.getInstance().error("TICKET INCONNU")).build();
+		      			//return Response.ok(BetTicketKDTO.getInstance().error(ResponseHolder.TCKNREG)).build();
+		      			return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("").error(ResponseHolder.TCKNREG)).build();
 		      		}
 		      		
 		      		//break;
@@ -860,6 +891,7 @@ public class Controller {
 		miset.setSummise(betk.getSummise());
 		
 		Partner part = partnerservice.findById(betk.getIdPartner());
+		betk.setBonusCod(1 + part.getBonuskcode());
 //		PartnerDTO pdto = (PartnerDTO) res.getEntity();
 //		Partner part = pdto.getPart();
 		
@@ -1064,13 +1096,14 @@ public class Controller {
 				  	cds.setDraw(Boolean.FALSE);
 				  	cds.setMiseAjour(Boolean.TRUE);
 				  	cds.setGameState(4);
-				  	System.out.println("[FINISH DRAW STEP 4] "+cds.isMiseAjour());
+				  	
 				  	supermanager.endDraw(cds.getDrawNumk(), cds.getPartner());
 				  	
-//				  	if (!Utile.ref.alive()) {
-//				  		Utile.ref = new RefreshK(cds,cds.getPartner(),applicationContext);
-//				  		Utile.ref.start();
-//				  	}
+				  	if (!Utile.ref.alive()) {
+				  	    System.out.println("[Refresh alive 4] "+cds.isMiseAjour());
+				  		Utile.ref = new RefreshK(cds,cds.getPartner(),applicationContext);
+				  		Utile.ref.start();
+				  	}
 			  }
 			 ob.put("state", cds.getGameState());
 			 String eve = Utile.convertJsonToString(ob);
@@ -1848,6 +1881,42 @@ public class Controller {
 			 List<Keno> lm = kenoservice.getLastKBonus(p);
 			 List<KenoRes> lknr = new ArrayList<>(lm.size());
 			 KenoRes kenr = new KenoRes();
+			 for (Keno k : lm) {
+				 kenr = new KenoRes();
+				 kenr.setBonuscod(k.getBonusKcod());
+				 kenr.setBonusKamount(k.getBonusKamount());
+				 kenr.setHeureTirage(k.getHeureTirage().replace(':', 'h').replace(',', '-'));
+				 kenr.setDrawnumbK(k.getDrawnumbK());
+				 kenr.setDrawnumK(k.getDrawnumK());
+				 kenr.setMultiplicateur(k.getMultiplicateur());
+				 kenr.setStr_draw_combi(k.getDrawnumbK());
+				 lknr.add(kenr);
+			 }
+			 
+			 ob.put("bonus", lknr);
+			 String eve = Utile.convertJsonToString(ob);
+			 return Response.ok(ResponseData.getInstance().event(eve).sucess("")).build();
+		 } catch (Exception e) {
+			e.printStackTrace();
+			return Response.ok(ResponseData.getInstance().error(e.getMessage())).build();
+		 }
+		 
+		
+	}
+	
+	@GetMapping("last-draw/{coderace}")
+	public Response getLdraw(@PathVariable("coderace") Long coderace) {
+		JSONObject ob = new JSONObject(); 
+		
+		 try {
+			 Partner p = null;
+			 p = partnerservice.findById(coderace);
+			 if (p == null ) return Response.ok(ResponseData.getInstance().error("")).build();
+			 
+			 List<Keno> lm = kenoservice.getLastKdraw(p);
+			 List<KenoRes> lknr = new ArrayList<>(lm.size());
+			 KenoRes kenr = new KenoRes();
+			 
 			 for (Keno k : lm) {
 				 kenr = new KenoRes();
 				 kenr.setBonuscod(k.getBonusKcod());

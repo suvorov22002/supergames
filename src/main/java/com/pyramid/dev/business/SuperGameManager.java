@@ -1380,8 +1380,8 @@ public class SuperGameManager {
    
    public synchronized long searchBarcode(Jeu jeu){
 		// TODO Auto-generated method stub
-		long lower = 9000000000L;
-		long higher = 10000000000L;
+		long lower = 900000000000L;
+		long higher = 999999999999L;
 		long dbl;
 		Miset mt;
 		

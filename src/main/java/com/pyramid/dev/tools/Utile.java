@@ -6,15 +6,21 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.pyramid.dev.business.RefreshK;
+import com.pyramid.dev.enums.Jeu;
+import com.pyramid.dev.model.GameCycle;
+import com.pyramid.dev.model.Misek;
+import com.pyramid.dev.model.Miset;
 
 
 public class Utile {
@@ -131,5 +137,111 @@ public class Utile {
 		
 		return timestamp;
 	}
+	
+//	public static void updateCoupon(ControlDisplayKeno cds) {
+//		if(cds.isMiseAjour()) {
+//			
+//			cds.setStr_draw_combi("");
+//			System.out.println("[REFRESH KENO MIS A JOUR]: "+_keno.getDrawnumK()+" multi: "+_keno.getMultiplicateur()+" coderace: "+_keno.getCoderace()+" id: "+_keno.getIdKeno());
+//			
+//				      _keno.setStarted(1);
+//					//  supermanager.endDraw(_keno);
+//					  supermanager.endDraw(_keno.getDrawnumK(), _keno.getPartner());
+//					  
+//					  cds.setEnd(1); //fin du tour
+//					  list_barcode = new ArrayList<Misek>();
+//					  list_barcode = mskservice.searchWaitingBet(partner, cds.getDrawNumk());
+//			     	  System.out.println("[REFRESH WAITING BET]"+list_barcode.size());
+//					  map_wait.clear();
+//					  for(Misek m : list_barcode) {
+//						  Miset mt = mstservice.findById(m.getMiset().getIdMiseT());
+//						  if(mt != null)
+//							  map_wait.put(mt, m);
+//					  }
+//					  supermanager.verifTicket(map_wait, partner);
+//					  if(!dead_round) {
+//						//recherche gmc
+//						  gmc = gmcservice.findByGame(partner, Jeu.K);
+//						  position = gmc.getPosition();
+//						  System.out.println("[REFRESH CYCLE POS TOUR]: "+position+" - "+tour);
+//						  if(position >= tour) {
+//							  idmisek_max = mskservice.ifindId(partner);
+//								//ArrayList<Integer> roundList = Params.getHitFrequency(gmc.getHitfrequence(), gmc.getTour());
+//								    List<Integer> roundList = supermanager.getHitFrequency(gmc.getHitfrequence(), gmc.getTour());	
+//									String posi = "";
+//									for(int nb : roundList) {
+//										
+//										posi = posi +"-"+ nb;
+//									}
+//									posi = posi.substring(1);
+//									arrangement_pos = posi;
+//									
+//								
+//								
+//								List<GameCycle> _gmc = gmcservice.find(partner);
+//								int taille = _gmc.size();
+//								double curr_percent = 1;
+//								double summise = 1;
+//								double sumWin = 0;
+//								double jkpt = 0;
+//					//			System.out.println("RefreshK  taille: "+taille);
+//								if(taille > 1) {
+//									GameCycle gm = _gmc.get(0); 
+//									//System.out.println("gm.getMise(): "+gm.getMise()+" Misef: "+misef+" partner "+partner.getCoderace());
+//									summise = mskservice.getMiseKCycle(gm.getMise(),misef, partner);
+//					//				System.out.println("RefreshK  summise: "+summise);
+//									sumWin = cds.getBonusrate()*summise + mskservice.getMiseKCycleWin(gm.getMise(),misef, partner);
+//									curr_percent = sumWin/summise;
+//									curr_percent = (double)((int)(curr_percent*100))/100;
+//									//jkpt = UtileKeno.bonusrate*summise;
+//					    			
+//					    			sumWin = (double)((int)(sumWin*100))/100;
+//					    			summise = (double)((int)(summise*100))/100;
+//					    			
+//					    			//recherche du jackpot
+//					    			Misek m1 = mskservice.searchMiseK(gm.getMise());
+//					    			Misek m2 = mskservice.searchMiseK(misef);
+//					    			if(m1 != null && m2 != null) {
+//					    				Long k1 = m1.getKeno().getIdKeno();
+//						    			Long k2 = m2.getKeno().getIdKeno();
+//						    			jkpt  = kenoservice.findTotalBonusAmount(k1, k2, partner);
+//						    			jkpt = (double)((int)(jkpt*100))/100;
+//					    				
+//					    			}
+//					    			else {
+//					    				jkpt = 0;
+//					    			}
+//					    			
+//								}
+//								
+//								
+//								//idmisek_max = misekDao.ifindId(IN);
+//								int add = gmcservice.updateArchive(curr_percent, DateFormatUtils.format(new Date(), "dd-MM-yyyy,HH:mm"), 1, partner, Jeu.K, misef, summise, sumWin, jkpt);
+//
+//									  GameCycle gamecycle = new GameCycle();
+//									  gamecycle.setRefundp(cds.getRtp());
+//									  gamecycle.setPosition(0);
+//									  gamecycle.setPartner(partner);
+//									  gamecycle.setPercent(percent);
+//									  gamecycle.setTour(tour);
+//									  gamecycle.setArrangement(arrangement_pos);
+//									  gamecycle.setHitfrequence(roundSize);
+//									  gamecycle.setJeu(Jeu.K);
+//									  gamecycle.setArchive(0);
+//									  gamecycle.setMise(misef);
+//									  gamecycle.setMisef(idmisek_max);
+//									  gamecycle.setDate_fin(DateFormatUtils.format(new Date(), "dd-MM-yyyy,HH:mm"));
+//									 
+//								//	  if(add != 0) {
+//									  gmcservice.create(gamecycle);
+//										  cds.setRtp(0);
+//								//	  }
+//									  
+//							} 
+//					  }
+//					  
+//					  cds.setMiseAjour(Boolean.FALSE);
+//		}
+//	}
 	
 }

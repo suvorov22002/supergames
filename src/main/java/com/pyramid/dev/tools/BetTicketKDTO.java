@@ -50,7 +50,8 @@ public class BetTicketKDTO extends ResponseBase {
 	
 	public BetTicketKDTO sucess(String msg) {
 		this.setCode(ResponseHolder.SUCESS);
-		this.setError(msg);
+		//this.setError(msg);
+		this.setMessage(msg);
 		return this;
 	}
 

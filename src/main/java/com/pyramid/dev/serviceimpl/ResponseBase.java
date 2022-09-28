@@ -66,10 +66,10 @@ public class ResponseBase implements Serializable {
 		if(ResponseHolder.mapMessage.get(this.code) != null) {
 			this.code = code;
 			this.setMessage(ResponseHolder.mapMessage.get(this.code));
-			this.setError(ResponseHolder.mapMessage.get(this.code));
+			//this.setError(ResponseHolder.mapMessage.get(this.code));
 		}else {
 			
-			this.setMessage(code);
+			this.setMessage(ResponseHolder.mapMessage.get(this.code));
 			code = "503";
 			this.code = code;
 			this.setError(ResponseHolder.mapMessage.get(this.code));

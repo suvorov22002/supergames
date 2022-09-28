@@ -1,5 +1,7 @@
 package com.pyramid.dev.daoimpl;
 
+import java.util.Optional;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -81,10 +83,16 @@ public class MisetDAOImpl implements MisetDAO {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Miset> query = currentSession.createQuery(QueryHelper.SQL_F_BARCODE, Miset.class);
 			query.setParameter("barcode", barcode);
-			mt = query.getSingleResult();
+			//mt = query.getSingleResult();
+			
+			Optional<Miset> q = query.uniqueResultOptional();
+			if (q.isPresent()) {
+				mt = q.get();
+				return mt;
+			}
 		}
 		catch(Exception e) {
-			System.err.println("MISET-ERROR: "+e);
+			e.printStackTrace();
 		}
 		return mt;
 		

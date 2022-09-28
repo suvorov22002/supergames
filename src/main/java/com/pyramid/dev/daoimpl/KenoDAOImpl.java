@@ -229,7 +229,7 @@ public class KenoDAOImpl implements KenoDAO {
 			}
 		}
 		catch(Exception e) {
-			System.err.println(e);
+			e.printStackTrace();
 		}
 		return ken;
 	}
