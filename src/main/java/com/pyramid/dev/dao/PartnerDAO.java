@@ -19,7 +19,7 @@ public interface PartnerDAO {
 	int update_bonusp(double dbl, int bncd, Partner partner) throws DAOException;
 	int update_reset_bonusk(double dbl, Partner partner) throws DAOException;
 	int update_reset_bonusp(double dbl, Partner partner) throws DAOException;
-	Partner findById(Long id) throws DAOException;
+	Partner findById(String id) throws DAOException;
 	List<Partner> getAllPartners() throws DAOException;
 	int update_cob(String cob,Partner partner) throws DAOException;
 	List<Partner> getAllPartnersByGroup(String idgrp) throws DAOException;

@@ -278,7 +278,7 @@ public class Controller {
 	public double retrieveBonusKeno(@PathVariable("coderace") String coderace) {
 		double bonus; 
 		 ControlDisplayKeno cds = Utile.display_draw.get(coderace);
-		 Partner p =  partnerservice.findById(cds.getPartner().getIdpartner());
+		 Partner p =  partnerservice.findById(cds.getPartner().getCoderace());
 		 bonus = p.getBonuskamount();
 		 return bonus;
 		// return partnerservice.findById(cds.getPartner().getIdPartner());
@@ -311,7 +311,7 @@ public class Controller {
 	}
 	
 	@GetMapping("airtime/{partner}/{login}/{credit}")
-	public Response pushAirtime(@PathVariable("partner") Long partner,@PathVariable("login") String login, @PathVariable("credit") Double credit) {
+	public Response pushAirtime(@PathVariable("partner") String partner,@PathVariable("login") String login, @PathVariable("credit") Double credit) {
 		 JSONObject ob = new JSONObject();
 		 double balance = 0;
 		 Airtime airtime = new Airtime();
@@ -792,10 +792,10 @@ public class Controller {
 		return mvtservice.update(mvnt);
 	}
 	
-	@PostMapping("save-user")
-	public Response saveUser(@RequestBody CaissierDto cais) {
+	@PostMapping("save-user/{coderace}")
+	public Response saveUser(@RequestBody CaissierDto cais, @PathVariable("coderace") String coderace) {
 		 Response res;
-		 Partner p = partnerservice.findById(cais.getPartner());
+		 Partner p = partnerservice.findById(coderace);
 		
 		 Long profil = cais.getProfil();
 		 Profil prof = new Profil();
@@ -872,8 +872,8 @@ public class Controller {
 		return resp;
 	}
 	
-	@PostMapping(value = "placeslip-keno", produces = "application/json")
-	public Response registerSlipK(@RequestBody BetTicketK betk) {
+	@PostMapping(value = "placeslip-keno/{partner}", produces = "application/json")
+	public Response registerSlipK(@RequestBody BetTicketK betk, @PathVariable("partner") String partner) {
 		boolean ajout;
 		double bonusrate = 0;
 		double amountbonus;
@@ -884,13 +884,16 @@ public class Controller {
 		//recherche du code barre
 		long barcode;
 		barcode = supermanager.searchBarcode(Jeu.K);
+		//barcode = Utile.barcodeKenoPool.get(0);
+		//Utile.barcodeKenoPool.remove(0);
+		
 		System.out.println("COntroller-barcode: "+barcode);
 		 
 		miset.setBarcode(""+barcode);
 		miset.setTypeJeu(Jeu.K);
 		miset.setSummise(betk.getSummise());
 		
-		Partner part = partnerservice.findById(betk.getIdPartner());
+		Partner part = partnerservice.findById(partner);
 		betk.setBonusCod(1 + part.getBonuskcode());
 //		PartnerDTO pdto = (PartnerDTO) res.getEntity();
 //		Partner part = pdto.getPart();
@@ -1424,7 +1427,7 @@ public class Controller {
 	}
 	
 	@GetMapping("stat-misek/{coderace}/{debut}/{fin}")
-	public Response statsMisek(@PathVariable("coderace") long coderace, @PathVariable("debut") long t1, @PathVariable("fin") long t2) {
+	public Response statsMisek(@PathVariable("coderace") String coderace, @PathVariable("debut") long t1, @PathVariable("fin") long t2) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1452,7 +1455,7 @@ public class Controller {
 	}
 	
 	@GetMapping("turnover/{coderace}")
-	public Response getTurnover(@PathVariable("coderace") Long coderace) {
+	public Response getTurnover(@PathVariable("coderace") String coderace) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1480,7 +1483,7 @@ public class Controller {
 	}
 	
 	@GetMapping("gamecycle/{coderace}")
-	public Response getCycle(@PathVariable("coderace") Long coderace) {
+	public Response getCycle(@PathVariable("coderace") String coderace) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1506,7 +1509,7 @@ public class Controller {
    }
 	
 	@GetMapping("findmaxMisek/{coderace}")
-	public Response getMaxMisek(@PathVariable("coderace") Long coderace) {
+	public Response getMaxMisek(@PathVariable("coderace") String coderace) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1526,7 +1529,7 @@ public class Controller {
    }
 	
 	@GetMapping("totalMisek/{coderace}/{m1}/{m2}")
-	public Response getSumMisek(@PathVariable("coderace") long coderace, @PathVariable("m1") Long m1, @PathVariable("m2") Long m2) {
+	public Response getSumMisek(@PathVariable("coderace") String coderace, @PathVariable("m1") Long m1, @PathVariable("m2") Long m2) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1546,7 +1549,7 @@ public class Controller {
    }
 	
 	@GetMapping("totalWin/{coderace}/{m1}/{m2}")
-	public Response getSumWin(@PathVariable("coderace") long coderace, @PathVariable("m1") Long m1, @PathVariable("m2") Long m2) {
+	public Response getSumWin(@PathVariable("coderace") String coderace, @PathVariable("m1") Long m1, @PathVariable("m2") Long m2) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1591,7 +1594,7 @@ public class Controller {
    }
 	
 	@GetMapping("jackpot/{coderace}/{m1}/{m2}")
-	public Response getjackpot(@PathVariable("coderace") Long coderace, @PathVariable("m1") Long m1, @PathVariable("m2") Long m2) {
+	public Response getjackpot(@PathVariable("coderace") String coderace, @PathVariable("m1") Long m1, @PathVariable("m2") Long m2) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1608,12 +1611,12 @@ public class Controller {
 		 }
    }
 	
-	@PostMapping("ugamecycle")
-	public Response updateCycle(@RequestBody GameCycleDto gm) {
+	@PostMapping("ugamecycle/{coderace}")
+	public Response updateCycle(@RequestBody GameCycleDto gm, @PathVariable("coderace") String coderace) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
-			 p = partnerservice.findById(gm.getPartner());
+			 p = partnerservice.findById(coderace);
 			 if (p == null ) return Response.ok(ResponseData.getInstance().error("")).build();
 			 
 			 
@@ -1637,8 +1640,8 @@ public class Controller {
 		 }
    }
 	
-	@PostMapping("gamecycle")
-	public Response createCycle(@RequestBody GameCycleDto gm) {
+	@PostMapping("gamecycle/{coderace}")
+	public Response createCycle(@RequestBody GameCycleDto gm, @PathVariable("coderace") String coderace) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 GameCycle gmc = new GameCycle();
@@ -1656,7 +1659,7 @@ public class Controller {
 			 gmc.setPosition(gm.getPosition());
 			 
 			 Partner p = null;
-			 p = partnerservice.findById(gm.getPartner());
+			 p = partnerservice.findById(coderace);
 			 gmc.setPartner(p);
 			 
 			 boolean resp = gmcservice.create(gmc);
@@ -1678,7 +1681,7 @@ public class Controller {
    }
 	
 	@GetMapping("miset/{coderace}/{t1}/{t2}")
-	public Response getMiset(@PathVariable("coderace") Long coderace, @PathVariable("t1") Long t1, @PathVariable("t2") Long t2) {
+	public Response getMiset(@PathVariable("coderace") String coderace, @PathVariable("t1") Long t1, @PathVariable("t2") Long t2) {
 		 JSONObject ob = new JSONObject(); 
 		 List<MisekDto> lm = new ArrayList<>();
 		// System.out.println("m1 "+m1);
@@ -1709,7 +1712,7 @@ public class Controller {
    }
 	
 	@GetMapping("versements/{coderace}/{t1}/{t2}")
-	public Response getVersement(@PathVariable("coderace") Long coderace, @PathVariable("t1") Long t1,  @PathVariable("t2") Long t2) {
+	public Response getVersement(@PathVariable("coderace") String coderace, @PathVariable("t1") Long t1,  @PathVariable("t2") Long t2) {
 		JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1736,7 +1739,7 @@ public class Controller {
 	}
 	
 	@GetMapping("airtimes/{coderace}/{cais}/{dat1}/{dat2}")
-	public Response getcumul(@PathVariable("coderace") Long coderace, @PathVariable("cais") String cais, @PathVariable("dat1") String dat1, @PathVariable("dat2") String dat2) {
+	public Response getcumul(@PathVariable("coderace") String coderace, @PathVariable("cais") String cais, @PathVariable("dat1") String dat1, @PathVariable("dat2") String dat2) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1759,7 +1762,7 @@ public class Controller {
    }
 	
 	@GetMapping("miserk/{coderace}/{cais}/{dat1}/{dat2}")
-	public Response getAllmiserk(@PathVariable("coderace") Long coderace, @PathVariable("cais") String cais, @PathVariable("dat1") Long dat1, @PathVariable("dat2") Long dat2) {
+	public Response getAllmiserk(@PathVariable("coderace") String coderace, @PathVariable("cais") String cais, @PathVariable("dat1") Long dat1, @PathVariable("dat2") Long dat2) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1781,7 +1784,7 @@ public class Controller {
    }
 	
 	@GetMapping("versemens/{coderace}/{cais}/{dat1}/{dat2}")
-	public Response getvers(@PathVariable("coderace") Long coderace, @PathVariable("cais") String cais, @PathVariable("dat1") Long dat1, @PathVariable("dat2") Long dat2) {
+	public Response getvers(@PathVariable("coderace") String coderace, @PathVariable("cais") String cais, @PathVariable("dat1") Long dat1, @PathVariable("dat2") Long dat2) {
 		 JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1803,7 +1806,7 @@ public class Controller {
    }
 	
 	@GetMapping("credit/{coderace}/{cais}/{dat1}/{dat2}")
-	public Response getallAirtime(@PathVariable("coderace") Long coderace, @PathVariable("cais") String cais, @PathVariable("dat1") String dat1, @PathVariable("dat2") String dat2) {
+	public Response getallAirtime(@PathVariable("coderace") String coderace, @PathVariable("cais") String cais, @PathVariable("dat1") String dat1, @PathVariable("dat2") String dat2) {
 		JSONObject ob = new JSONObject(); 
 		 try {
 			 Partner p = null;
@@ -1828,12 +1831,12 @@ public class Controller {
 		
 	}
 	
-	@PostMapping("cagnotte")
-	public Response createCagnotte(@RequestBody Cagnotte gm) {
+	@PostMapping("cagnotte/{coderace}")
+	public Response createCagnotte(@RequestBody Cagnotte gm, @PathVariable("coderace") String coderace) {
 
 		 try {
 			Partner p = null;
-			p = partnerservice.findById(gm.getIdpart());
+			p = partnerservice.findById(coderace);
 			if (p == null) return Response.ok(CagnotteDTO.getInstance().error("NOT FOUND")).build();
 			gm.setPartner(p);
 			if(cagnotservice.create(gm)) {
@@ -1850,7 +1853,7 @@ public class Controller {
    }
 	
 	@GetMapping("bonusk-cf/{coderace}/{bnkmin}/{bnkmax}/{rate}")
-	public Response bonuskcfg(@PathVariable("coderace") Long coderace, @PathVariable("bnkmin") double bnkmin, 
+	public Response bonuskcfg(@PathVariable("coderace") String coderace, @PathVariable("bnkmin") double bnkmin, 
 			@PathVariable("bnkmax") double bnkmax, @PathVariable("rate") double rate) {
 		System.out.println("bnkmin: "+bnkmin);
 		 JSONObject ob = new JSONObject(); 
@@ -1870,7 +1873,7 @@ public class Controller {
 	}
 	
 	@GetMapping("bonus/{coderace}")
-	public Response getBonus(@PathVariable("coderace") Long coderace) {
+	public Response getBonus(@PathVariable("coderace") String coderace) {
 		JSONObject ob = new JSONObject(); 
 		
 		 try {
@@ -1905,7 +1908,7 @@ public class Controller {
 	}
 	
 	@GetMapping("last-draw/{coderace}")
-	public Response getLdraw(@PathVariable("coderace") Long coderace) {
+	public Response getLdraw(@PathVariable("coderace") String coderace) {
 		JSONObject ob = new JSONObject(); 
 		
 		 try {

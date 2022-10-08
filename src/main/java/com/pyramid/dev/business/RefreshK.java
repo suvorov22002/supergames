@@ -88,11 +88,11 @@ public class RefreshK implements Runnable {
 	public void run() {
 
 		System.out.println("[REFRESHK - RUN]: "+partner);
-		Keno __keno = this.cds.lastDrawNum(partner);
-		if(!__keno.getMultiplicateur().equalsIgnoreCase("0")) {
-			int num_tirage = 1+__keno.getDrawnumK();
-			supermanager.addKenos(num_tirage, partner);
-		}
+//		Keno __keno = this.cds.lastDrawNum(partner);
+//		if(!__keno.getMultiplicateur().equalsIgnoreCase("0")) {
+//			int num_tirage = 1+__keno.getDrawnumK();
+//			supermanager.addKenos(num_tirage, partner);
+//		}
 		
 		refill = 0;
 
@@ -108,22 +108,16 @@ public class RefreshK implements Runnable {
 		int index_combi = 0;
 		String[] str_draw_combi = null;
 		String str_combi = "";
-		
+		Keno _keno;
 	//	System.out.println("caissiers: "+caissiers);
 		while(true) {
-		//	  System.out.println("CountDown(): "+cds.isCountDown());
-			Keno _keno = null;
+			System.out.println("caissiers: "+partner.toString());
+			_keno = this.cds.lastDrawNum(partner);
+			System.out.println("_keno: "+_keno);
 			
-			//do {
-				_keno = this.cds.lastDrawNum(partner);
-				//System.out.println("refresh max draw"+partner.getCoderace());
-		//	}
-		//	while(_keno == null);
-
 			cds.setDraw_finish(Boolean.FALSE);
-		//	cds.setDraw(Boolean.FALSE);
-			
-			cds.setDrawNumk(_keno.getDrawnumK());
+			if (_keno != null)
+				cds.setDrawNumk(_keno.getDrawnumK());
 		
 			if(!Utile.display_draw.containsKey(cds.getCoderace())) {
 				Utile.display_draw.put(cds.getCoderace(), cds);
@@ -135,13 +129,10 @@ public class RefreshK implements Runnable {
 					  Miset mt = mstservice.findById(m.getMiset().getIdMiseT());
 					  misef = m.getIdMiseK();
 				  }
-			
-	
 			str_draw_combi = cds.getDrawCombik().split("-");
 			cds.setDrawCount(140);
-		//	System.out.println("cds.isDraw out "+cds.isDraw());
+		
 			while(cds.isDraw()){
-			//	System.out.println("cds.isDraw() "+cds.isDraw());
 				++compteur_combi;
 			//	System.out.println("cds.getDrawCount(): "+cds.getDrawCount()+ " | "+ cds.isDraw_finish());
 				try {
@@ -160,39 +151,7 @@ public class RefreshK implements Runnable {
 					cds.setDrawCount(cds.getDrawCount()-1);
 					drawCount = cds.getDrawCount();
 					Utile.display_draw.put(cds.getCoderace(), cds);
-				//	System.out.println("TIME DRAW "+drawCount);
-//					if(drawCount == -1){ //implementation dans le controller
-//						int num_tirage = 1+cds.getDrawNumk();
-//						System.out.println("DRAW Ajout d'une nouvelle ligne de tirage "+partner.getCoderace()+" | "+drawCount );
-//						boolean line = supermanager.addKenos(num_tirage, partner);
-//						
-//				//		System.out.println("Nouvelle ligne de tirage added "+line );
-//						if(line){
-//							System.out.println("num added "+num_tirage );
-//							cds.setDrawNumk(num_tirage);
-//						}
-//					//	cds.setTimeKeno(UtileKeno.timeKeno);
-//						cds.setCanbet(true);
-//						//cds.setGameState(3);
-//						Utile.display_draw.put(cds.getCoderace(), cds);
-//						
-//						String str_draw = cds.getDrawCombik();
-//						cds.getAllDraw().remove(99);
-//						cds.getAllDraw().add(0, str_draw);
-////						Utile.allDraw.remove(99);
-////						Utile.allDraw.add(0, str_draw);
-//						
-//						String[] passDraw;
-//						passDraw  =cds.getAllDraw().get(0).split("-");
-//						for(int j=0; j<passDraw.length; j++) {
-//							String key = passDraw[j];
-//							//int value = Utile.allDrawNumOdds.get(key);
-//							String value = cds.getAllDrawNumOdds().get(key);
-//							
-//							cds.getAllDrawNumOdds().put(key, ""+(Integer.parseInt(value) + 1));
-//						}
-//						
-//					}
+
 					
 					if(drawCount < 0 || cds.isDraw_finish()){
 						cds.setDraw(false);
@@ -330,6 +289,12 @@ public class RefreshK implements Runnable {
 						  cds.setMiseAjour(Boolean.FALSE);
 			}
 			
+			try {
+				Thread.sleep(9000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

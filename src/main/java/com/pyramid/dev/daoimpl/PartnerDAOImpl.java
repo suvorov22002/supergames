@@ -83,7 +83,7 @@ public class PartnerDAOImpl implements PartnerDAO {
 		return (int) currentSession.createQuery(QueryHelper.SQL_U_BONUS_AMOUNT_PARTNER)
 		.setParameter("bonuskamount", dbl)
 		.setParameter("bonuskcode", bncd)
-		.setParameter("coderace", partner.getIdpartner())
+		.setParameter("coderace", partner.getCoderace())
 		.executeUpdate();
 	}
 
@@ -116,12 +116,12 @@ public class PartnerDAOImpl implements PartnerDAO {
 	}
 
 	@Override
-	public Partner findById(Long id) throws DAOException {
+	public Partner findById(String id) throws DAOException {
 		Partner p = null;
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Partner> query = currentSession.createQuery(QueryHelper.SQL_F_PARTNER_BY_ID, Partner.class);
-			query.setParameter("idpartner", id);
+			query.setParameter("partner", id);
 			//p = query.getSingleResult();
 			//return Response.ok(PartnerDTO.getInstance().event(p).sucess("")).build();
 			Optional<Partner> q = query.uniqueResultOptional();

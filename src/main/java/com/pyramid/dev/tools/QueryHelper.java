@@ -21,11 +21,9 @@ public class QueryHelper {
 	public static final String SQL_F_PREVIOUS_BONUS = "From Keno where bonusKcod !=0 and partner=:coderace "
 			+ "Order By idKeno Desc ";	
 	public static final String SQL_F_SUM_BONUS = "SELECT sum( bonusKamount ) FROM Keno WHERE idKeno >:idkeno AND idKeno <=:idkeno1 and partner=:coderace ";
-	public static final String SQL_F_PREVIOUS_TWEL_DRAW = "FROM Keno"
-			+ " WHERE multiplicateur != '0' AND partner=:coderace "
-			+ "ORDER BY drawnumK DESC ";
-	public static final String SQL_F_SINGLE_DRAW = "From Keno WHERE partner=:coderace";		
-	public static final String SQL_F_MAX_DRAW_NUM = "From Keno WHERE partner=:coderace and drawnumK=:drawnum ";
+	
+	public static final String SQL_F_ALL_DRAW = "From Keno WHERE partner=:coderace";		
+	//public static final String SQL_F_DRAW = "From Keno WHERE partner=:coderace and drawnumK=:drawnum ";
 	public static final String SQL_U_KENO = "UPDATE Keno SET drawnumbK=:drawnumbK ,"
 		      + " multiplicateur = :multi , heureTirage = :heur "
 		      + "WHERE drawnumK = :drawnum AND coderace = :coderace "; 
@@ -40,11 +38,11 @@ public class QueryHelper {
 	
 	/* CaissierDAO queries*/
 	
-	public static final String SQL_F_LOGIN_PASS = "FROM Caissier WHERE loginC=:loginC and partner =: partner"; 
+	public static final String SQL_F_LOGIN_PASS = "FROM Caissier WHERE loginc=:loginC and partner =: partner"; 
 	public static final String SQL_CAIS_F_ID = "From Caissier where idCaissier =:idCaissier ";
-	public static final String SQL_U_CAISSIER_STATE = "UPDATE Caissier Set statut=:statut WHERE loginC=:loginC ";  
+	public static final String SQL_U_CAISSIER_STATE = "UPDATE Caissier Set statut=:statut WHERE loginc=:loginC ";  
 	public static final String SQL_F_LOGIN_PARTNER = "FROM Caissier WHERE partner IN ( From Partner where coderace =:coderace ) "; 
-	public static final String SQL_F_LOGIN_CODERACE = "From Caissier where loginC=:login and idPartner =:id ";
+	public static final String SQL_F_LOGIN_CODERACE = "From Caissier where loginc=:login and partner =:id ";
 	
 	/* GameCycleDAO queries*/
 	public static final String SQL_F_GAMECYCLE = "From GameCycle Where partner =:partner Order By idcycle desc ";
@@ -79,12 +77,12 @@ public class QueryHelper {
 	/* PartnerDAO queries */
 	
 	public static final String SQL_U_BONUS_AMOUNT_PARTNER = "Update Partner SET bonuskamount =:bonuskamount , bonuskcode=:bonuskcode "
-			+ " WHERE idPartner =:coderace ";
+			+ " WHERE coderace =:coderace ";
 	public static final String SQL_U_BONUSP_AMOUNT_PARTNER = "Update Partner SET bonuspamount =:bonuspamount , bonuspcode=:bonuspcode"
 			+ " WHERE coderace =:coderace ";
 	public static final String SQL_U_BONUS_RESET_AMOUNT_PARTNER = "Update Partner SET bonuskamount =:bonuskamount WHERE coderace =:coderace ";
 	public static final String SQL_U_BONUSP_RESET_AMOUNT_PARTNER = "Update Partner SET bonuskamount =:bonuspamount WHERE coderace =:coderace ";
-	public static final String SQL_F_PARTNER_BY_ID = "From Partner WHERE idpartner =:idpartner ";
+	public static final String SQL_F_PARTNER_BY_ID = "From Partner WHERE coderace =:partner ";
 	public static final String SQL_U_COB_PARTNER = "UPDATE Partner SET COB =:cob WHERE coderace =:coderace ";
 	public static final String SQL_F_PARTNER_BY_GROUP = "From Partner WHERE groupe =:groupe ";
 	public static final String SQL_F_PARTNER_CONF = "Select P.coderace as coderace, bnkmin, bnkmax, bnpmin, bnpmax, bndmin, "

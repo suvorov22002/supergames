@@ -514,7 +514,7 @@ public class SuperGameManager {
 	
 	public boolean addKenos(int draw_num, Partner partner) {
 		System.out.println("draw_num "+draw_num);
-		Keno k = kenoservice.find_Max_draw_num(partner, draw_num);
+		Keno k = kenoservice.findDraw(partner, draw_num);
 		if(k != null) {
 			return true;
 		}

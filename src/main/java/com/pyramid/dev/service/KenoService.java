@@ -28,7 +28,7 @@ public interface KenoService {
 	List<Keno> getLastKBonus(Partner partner) throws DAOException;
 	double findTotalBonusAmount(Long id1, Long id2, Partner partner) throws DAOException;
 	List<Keno> find_Last_draw(Partner partner) throws DAOException;
-	Keno find_Single_draw(Partner partner) throws DAOException;
-	Keno find_Max_draw_num(Partner partner, int num) throws DAOException;
+	List<Keno> findAllDraw(Partner partner) throws DAOException;
+	Keno findDraw(Partner partner, int num) throws DAOException;
 	List<Keno> getAllLastKdraw(Partner partner) throws DAOException;
 }

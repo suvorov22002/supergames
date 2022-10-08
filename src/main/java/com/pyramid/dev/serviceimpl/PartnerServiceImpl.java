@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pyramid.dev.PartnerRepository;
 import com.pyramid.dev.dao.PartnerDAO;
 import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.Partner;
 import com.pyramid.dev.model.PartnerDto;
 import com.pyramid.dev.service.PartnerService;
 import com.pyramid.dev.tools.ControlDisplayKeno;
+import com.pyramid.dev.tools.PartnerDTO;
 
 @Service
 @Transactional
@@ -22,28 +24,46 @@ public class PartnerServiceImpl implements PartnerService {
 	@Autowired
 	private PartnerDAO partnerdao;
 	
+//	@Autowired 
+//	private PartnerRepository partnerRepo;
+	
 	@Override
 	public Response create(Partner partner) throws DAOException {
+		
+		//Partner part = partnerRepo.findByCoderace(partner.getCoderace());
+		
+//		if (part != null) {
+//			return Response.ok(PartnerDTO.getInstance().event(partner).error("Partenaire existant")).build();
+//		}
+//		return Response.ok(PartnerDTO.getInstance().event(partner).sucess("")).build();
+		
 		return partnerdao.create(partner);
 	}
 
 	@Override
 	public Partner find(Partner partner) throws DAOException {
+//		return partnerRepo.findByCoderace(partner.getCoderace());
 		return partnerdao.find(partner);
 	}
 
 	@Override
 	public boolean update(Partner partner) throws DAOException {
+		//return partnerRepo.saveAndFlush(partner) != null ? true : false;
 		return partnerdao.update(partner);
 	}
 
 	@Override
 	public void delete(Partner partner) throws DAOException {
-		partnerdao.delete(partner);
+//		Partner part = partnerRepo.findByCoderace(partner.getCoderace());
+//		if (part != null ) {
+//			part.setActif(0);
+//			partnerRepo.saveAndFlush(part);
+//		}
 	}
 
 	@Override
 	public int update_bonusk(double dbl, int bncd, Partner partner) throws DAOException {
+		//return partnerRepo.updateBonusk(dbl, bncd, partner.getIdpartner());
 		return partnerdao.update_bonusk(dbl, bncd, partner);
 	}
 
@@ -54,6 +74,7 @@ public class PartnerServiceImpl implements PartnerService {
 
 	@Override
 	public int update_reset_bonusk(double dbl, Partner partner) throws DAOException {
+		//return partnerRepo.updateResetBonusk(dbl, partner.getCoderace());
 		return partnerdao.update_reset_bonusk(dbl, partner);
 	}
 
@@ -63,7 +84,7 @@ public class PartnerServiceImpl implements PartnerService {
 	}
 
 	@Override
-	public Partner findById(Long id) throws DAOException {
+	public Partner findById(String id) throws DAOException {
 		return partnerdao.findById(id);
 	}
 

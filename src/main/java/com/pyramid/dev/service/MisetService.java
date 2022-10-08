@@ -18,4 +18,6 @@ public interface MisetService {
 	int updateFree(String game, double step, Partner coderace) throws DAOException;
 	int createFree(Partner coderace) throws DAOException;
 	Miset findBarcode(Long code, Jeu jeu) throws DAOException;
+	
+	long searchBarcode(Jeu jeu) throws DAOException;
 }

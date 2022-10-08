@@ -113,13 +113,13 @@ public class KenoServiceImpl implements KenoService {
 	}
 
 	@Override
-	public Keno find_Single_draw(Partner partner) throws DAOException, EmptyResultDataAccessException {
-		return kenodao.find_Single_draw(partner);
+	public List<Keno> findAllDraw(Partner partner) throws DAOException, EmptyResultDataAccessException {
+		return kenodao.findAllDraw(partner);
 	}
 
 	@Override
-	public Keno find_Max_draw_num(Partner partner, int num) throws DAOException {
-		return kenodao.find_Max_draw_num(partner, num);
+	public Keno findDraw(Partner partner, int num) throws DAOException {
+		return kenodao.findDraw(partner, num);
 	}
 
 	@Override

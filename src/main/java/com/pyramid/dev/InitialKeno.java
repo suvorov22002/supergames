@@ -22,6 +22,7 @@ import com.pyramid.dev.model.Config;
 import com.pyramid.dev.model.GameCycle;
 import com.pyramid.dev.model.Groupe;
 import com.pyramid.dev.model.Keno;
+import com.pyramid.dev.model.Miset;
 import com.pyramid.dev.model.Mouvement;
 import com.pyramid.dev.model.Partner;
 import com.pyramid.dev.service.AirtimeService;
@@ -31,6 +32,7 @@ import com.pyramid.dev.service.ConfigService;
 import com.pyramid.dev.service.GameCycleService;
 import com.pyramid.dev.service.GroupeService;
 import com.pyramid.dev.service.KenoService;
+import com.pyramid.dev.service.MisetService;
 import com.pyramid.dev.service.MouvementService;
 import com.pyramid.dev.service.PartnerService;
 import com.pyramid.dev.tools.ControlDisplayKeno;
@@ -70,7 +72,8 @@ public class InitialKeno {
 	GroupeService grpeservice;
 	
 	@Autowired
-	static SuperGameManager supergmanager;
+	MisetService mstservice;
+	
 	
 	@PostConstruct
 	public void intializeKeno() {
@@ -78,6 +81,7 @@ public class InitialKeno {
 //		Utile.keno = 185;
 		
 		Utile.display_draw = new HashMap<String, ControlDisplayKeno>();
+		Utile.barcodeKenoPool = new ArrayList<>(1000);
 		
 		List<Partner> partners = partnerservice.getAllPartners();
 		System.out.println("[INITIAL KENO - ALL]: "+partners.size());
@@ -100,6 +104,15 @@ public class InitialKeno {
 		}
 //		RefreshK ref = new RefreshK();
 //		ref.start();
+//		long barcode;
+//		// load barcode pool
+//		do {
+//			barcode = searchBarcode(Jeu.K);
+//			Utile.barcodeKenoPool.add(barcode);
+//			//System.out.println("[INITIAL KENO - barcodePool]: "+barcode);
+//		}
+//		while (Utile.barcodeKenoPool.size() < 1000);
+		
 		
 		
 		for (Partner partner : partners) {
@@ -107,12 +120,12 @@ public class InitialKeno {
 			//Verification des configurations de bases
 			//** Entrée dans la table Keno **
 			String coderace = partner.getCoderace();
-			Keno keno = kenoservice.find_Single_draw(partner);
-			System.out.println("[INITIAL KENO - KENO COUNT]: "+keno);
+			List<Keno> keno = kenoservice.findAllDraw(partner);
+			System.out.println("[INITIAL KENO - KENO COUNT]: "+keno.size());
 			Cagnotte cgt = cagnotservice.find(partner);
 			System.out.println("[INITIAL KENO - CAGNOT COUNT]: "+cgt);
 			
-			if(keno == null) {
+			if(keno.isEmpty()) {
 				//On ajoute une entrée pour le partner dans la table Keno
 				Keno ken = new Keno();
 				ken.setDrawnumK(1);
@@ -121,6 +134,21 @@ public class InitialKeno {
 				boolean nb_race = kenoservice.create(ken);
 				if(nb_race) {
 					System.out.println("[INITIAL KENO - INIT KENO]: "+coderace);
+				}
+			}
+			else {
+				Keno k = keno.get(keno.size()-1);
+				if(!k.getMultiplicateur().equalsIgnoreCase("0")) {
+					int num_tirage = 1+k.getDrawnumK();
+					Keno ken = kenoservice.findDraw(partner, num_tirage);
+					if(ken == null) {
+						ken = new Keno();
+						ken.setDrawnumK(num_tirage);
+						ken.setPartner(partner);
+						ken.setCoderace(partner.getCoderace());
+						kenoservice.create(ken);
+					}
+					
 				}
 			}
 			
@@ -262,6 +290,22 @@ public class InitialKeno {
 		}
 		
 		cds.setAllDrawNumOdds(allDrawNumOdds);
+	}
+	
+	private synchronized long searchBarcode(Jeu jeu){
+		// TODO Auto-generated method stub
+		long lower = 900000000000L;
+		long higher = 999999999999L;
+		long dbl;
+		Miset mt;
+		
+		do{  
+		    dbl = (long) (Math.random() * (higher-lower)) + lower;
+			mt = mstservice.findBarcode(dbl, jeu);
+		}
+		while(mt != null);
+		
+		return dbl; 
 	}
 	
    

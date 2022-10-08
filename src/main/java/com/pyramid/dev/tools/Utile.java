@@ -34,7 +34,7 @@ public class Utile {
 	public static int bonus_codeK;
 	public static double bonusKmin = 0.0;
 	public static double bonusrate;
-	
+	public static List<Long> barcodeKenoPool;
 	public static double num10[] = {0,0,0,1,2,3,5,10,200,2000,10000};
 	public static double num9[] = {0,0,0,1,2,3,25,100,1500,9000};
 	public static double num8[] = {0,0,0,1,4,15,50,1200,8000};
@@ -243,5 +243,7 @@ public class Utile {
 //					  cds.setMiseAjour(Boolean.FALSE);
 //		}
 //	}
+	
+	
 	
 }

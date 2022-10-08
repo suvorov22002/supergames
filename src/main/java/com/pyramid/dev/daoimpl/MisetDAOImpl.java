@@ -160,4 +160,10 @@ public class MisetDAOImpl implements MisetDAO {
 		return mt;
 	}
 
+	@Override
+	public long searchBarcode(Jeu jeu) throws DAOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

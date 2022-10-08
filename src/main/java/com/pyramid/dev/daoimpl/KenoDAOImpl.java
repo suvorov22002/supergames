@@ -1,5 +1,6 @@
 package com.pyramid.dev.daoimpl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,10 +67,9 @@ public class KenoDAOImpl implements KenoDAO {
 
 	@Override
 	public Keno find_Max_draw(Partner partner) throws DAOException {
-		
+		Session currentSession = sessionFactory.getCurrentSession();
 		Keno ken = null;
 		try {
-			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Keno> query = currentSession.createQuery(QueryHelper.SQL_F_MAX_DRAW, Keno.class);
 			query.setParameter("coderace", partner)
 			     .setParameter("coderace1", partner);
@@ -78,10 +78,14 @@ public class KenoDAOImpl implements KenoDAO {
 			if (q.isPresent()) {
 				ken = q.get();
 			}
+			
+			
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 		return ken;
 	}
 	
@@ -322,7 +326,7 @@ public class KenoDAOImpl implements KenoDAO {
 	@Override
 	public List<Keno> find_Last_draw(Partner partner) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
-		Query<Keno> query = currentSession.createQuery(QueryHelper.SQL_F_PREVIOUS_TWEL_DRAW, Keno.class);
+		Query<Keno> query = currentSession.createQuery(QueryHelper.SQL_F_PREVIOUS_FIVE_DRAW, Keno.class);
 		query.setParameter("coderace", partner)
 			 .setFirstResult(0)
 		     .setMaxResults(12);
@@ -332,23 +336,18 @@ public class KenoDAOImpl implements KenoDAO {
 	}
 
 	@Override
-	public Keno find_Single_draw(Partner partner) throws DAOException, EmptyResultDataAccessException {
-		Keno ken = null;
+	public List<Keno> findAllDraw(Partner partner) throws DAOException, EmptyResultDataAccessException {
+		List<Keno> ken = new ArrayList<>();
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
-			Query<Keno> query = currentSession.createQuery(QueryHelper.SQL_F_SINGLE_DRAW, Keno.class);
+			Query<Keno> query = currentSession.createQuery(QueryHelper.SQL_F_ALL_DRAW, Keno.class);
 			query.setParameter("coderace", partner);
 			    
-			List<Keno> lkeno = query.getResultList();
-			if (!lkeno.isEmpty()) {
-				ken = lkeno.get(0);
-			}
-			
+			ken = query.getResultList();
 			
 		}
 		catch(Exception e) {
 			e.printStackTrace();
-			return ken;
 		}
 		
 		return ken;
@@ -356,11 +355,11 @@ public class KenoDAOImpl implements KenoDAO {
 	}
 
 	@Override
-	public Keno find_Max_draw_num(Partner partner, int num) throws DAOException {
+	public Keno findDraw(Partner partner, int num) throws DAOException {
 		Keno ken = null;
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
-			Query<Keno> query = currentSession.createQuery(QueryHelper.SQL_F_MAX_DRAW_NUM, Keno.class);
+			Query<Keno> query = currentSession.createQuery(QueryHelper.SQL_F_DRAW, Keno.class);
 			query.setParameter("coderace", partner)
 				 .setParameter("drawnum", num);
 			//ken = query.getSingleResult();

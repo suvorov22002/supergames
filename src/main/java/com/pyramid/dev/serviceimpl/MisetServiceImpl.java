@@ -80,4 +80,9 @@ public class MisetServiceImpl implements MisetService {
 		return misetdao.findBarcode(code, jeu);
 	}
 
+	@Override
+	public long searchBarcode(Jeu jeu) throws DAOException {
+		return misetdao.searchBarcode(jeu);
+	}
+
 }

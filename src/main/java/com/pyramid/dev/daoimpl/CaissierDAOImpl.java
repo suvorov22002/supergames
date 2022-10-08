@@ -147,7 +147,7 @@ public class CaissierDAOImpl implements CaissierDAO {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Caissier> query = currentSession.createQuery(QueryHelper.SQL_F_LOGIN_CODERACE, Caissier.class);
 		query.setParameter("login", login)
-		     .setParameter("id", partner.getIdpartner());
+		     .setParameter("id", partner);
 		Caissier cais = null;
 		//Caissier cais = query.getSingleResult();
 		Optional<Caissier> q = query.uniqueResultOptional();
