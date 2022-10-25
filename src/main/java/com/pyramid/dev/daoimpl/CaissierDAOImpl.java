@@ -58,7 +58,7 @@ public class CaissierDAOImpl implements CaissierDAO {
 				caisdto.transToCaissier(cais);
 			}
 		}catch(Exception e) {
-			System.err.println(e);
+			e.printStackTrace();
 			return Response.ok(CaissierDTO.getInstance().error("USER NOT FOUND")).build();
 		}
 		return Response.ok(CaissierDTO.getInstance().event(caisdto).sucess("")).build();

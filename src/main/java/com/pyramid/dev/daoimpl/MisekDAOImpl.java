@@ -18,6 +18,7 @@ import com.pyramid.dev.enums.EtatMise;
 import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.AdminTicketDto;
 import com.pyramid.dev.model.Caissier;
+import com.pyramid.dev.model.EffChoicek;
 import com.pyramid.dev.model.Keno;
 import com.pyramid.dev.model.Misek;
 import com.pyramid.dev.model.Miset;
@@ -112,7 +113,7 @@ public class MisekDAOImpl implements MisekDAO {
 			misk = query.getSingleResult();
 		}
 		catch(Exception e) {
-			System.err.println(e);
+			e.printStackTrace();
 		}
 		
 		return misk;
@@ -154,6 +155,11 @@ public class MisekDAOImpl implements MisekDAO {
 		return (int) currentSession.createQuery(QueryHelper.SQL_F_DRAW_NUM)
 				.setParameter("misek", misek.getIdMiseK())
 				.getSingleResult();
+		
+//		Optional<Integer> q = query.uniqueResultOptional();
+//		if (q.isPresent()) {
+//			misk = q.get();
+//		}
 	}
 
 	@Override
@@ -288,7 +294,7 @@ public class MisekDAOImpl implements MisekDAO {
 	@Override
 	public List<Misek> searchWaitingKenoBet(Partner partner, int drawnum) throws DAOException {
 		
-		List<Misek> misk = null;
+		List<Misek> misk = new ArrayList<Misek>();
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Misek> query =  currentSession.createQuery(QueryHelper.SQL_F_WAITING_KENO_BET,  Misek.class);
@@ -374,6 +380,43 @@ public class MisekDAOImpl implements MisekDAO {
 		.setParameter("heur1", date)
 		.setParameter("heur2", date1)
 		.getSingleResult();
+	}
+
+	@Override
+	public List<EffChoicek> waitingKenoBet(Partner partner, int drawnum) throws DAOException {
+		List<EffChoicek> misk = null;
+		try {
+			Session currentSession = sessionFactory.getCurrentSession();
+			Query<EffChoicek> query =  currentSession.createQuery(QueryHelper.SQL_F_WAITING_EFFCHK,  EffChoicek.class);
+			query.setParameter("drawnumk", drawnum)
+			     .setParameter("etatmise",EtatMise.ATTENTE)
+			     .setParameter("partner", partner);
+	
+			//misk = query.getResultList();
+			Optional<List<EffChoicek>> q = Optional.ofNullable(query.getResultList());
+			if (q.isPresent()) {
+				misk = q.get();
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		return misk;
+	}
+
+	@Override
+	public int updateAll(List<Misek> list) throws DAOException {
+		
+		try {
+			for (Misek m : list) {
+				sessionFactory.getCurrentSession().update(m);
+			}
+		}catch(DAOException e) {
+			e.printStackTrace();
+			return 0;
+		}
+		
+		return 1;
 	}
 
 }

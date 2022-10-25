@@ -2,6 +2,7 @@ package com.pyramid.dev.daoimpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -96,7 +97,11 @@ public class VersementDAOImpl implements VersementDAO {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Versement> query = currentSession.createQuery(QueryHelper.SQL_F_VERS_MISET, Versement.class);
 			query.setParameter("mise", idmiset);
-			vers = query.getSingleResult();
+			//vers = query.getSingleResult();
+			Optional<Versement> q = query.uniqueResultOptional();
+			if (q.isPresent()) {
+				vers = q.get();
+			}
 		}
 		catch(Exception e) {
 			System.err.println("MISET-ERROR: "+e);

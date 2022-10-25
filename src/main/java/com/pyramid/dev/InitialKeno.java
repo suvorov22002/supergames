@@ -8,6 +8,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -40,6 +42,8 @@ import com.pyramid.dev.tools.Utile;
 
 @Component
 public class InitialKeno {
+	
+	private static Log logger = LogFactory.getLog(InitialKeno.class);
 	
 	@Autowired
 	PartnerService partnerservice;

@@ -120,7 +120,7 @@ public class MisetDAOImpl implements MisetDAO {
 			mt = query.getSingleResult();
 		}
 		catch(Exception e) {
-			System.err.println(e);
+			e.printStackTrace();
 		}
 		
 		return mt;

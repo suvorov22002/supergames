@@ -52,6 +52,7 @@ public class ControlDisplayKeno implements Runnable{
 	private Map<Miset, Misek> mapTicket;
 	private double gMp;
 	private double gmp;
+	private Map<String, String> rescue;
 	private double bonuskamount;
 	private double bonusPamount;
 	private String heureTirage;
@@ -383,6 +384,14 @@ public class ControlDisplayKeno implements Runnable{
 	public void setAllDrawNumOdds(Map<String, String> allDrawNumOdds) {
 		this.allDrawNumOdds = allDrawNumOdds;
 	}
+	
+	public Map<String, String> getRescue() {
+		return rescue;
+	}
+
+	public void setRescue(Map<String, String> rescue) {
+		this.rescue = rescue;
+	}
 
 	public Keno lastDrawNum(Partner partner){
 		Keno keno = null;
@@ -398,18 +407,22 @@ public class ControlDisplayKeno implements Runnable{
 	
     private String buscarDraw(double sumdist,Map<Miset, Misek> mapTicket,double gMp,double gmp){
 		
-		ArrayList<String> combis = new ArrayList<String>();
-    	ArrayList<String> combi = new ArrayList<String>();
+		List<String> combis = new ArrayList<String>();
+    	List<String> combi = new ArrayList<String>();
     	double sumDistTotale = 0;
+    	double n;
     	boolean trouve = false;
     	String str = ""; 
     	String _str = "";
 	    System.out.println("GMP: "+gMp+" GmP: "+gmp+" DIST: "+sumdist);	
-	    System.out.println("mapTicket: "+mapTicket.size());	
+	//    System.out.println("mapTicket: "+mapTicket.size());	
 	//    if(sumdist <= gmp || sumdist==0) {
 	    	
 	    if(sumdist <= 0) {
-    		System.out.println("HERE 3");
+    		System.out.println("----- NOTHING TO DISTIBUTE -- OR 2KNIFESIDES: "+ gmp);
+    		if (gmp != 0) {
+	    		multiplix = Utile.multiplicateur[3]; 
+	    	}
     		
     		do {
     			combis.clear();
@@ -428,8 +441,12 @@ public class ControlDisplayKeno implements Runnable{
     	    		str = str + combi.get(k) + "-";
     	    	}
     	    	str = str + combi.get(19);
-    	    	double n = Utile.generate(3);
-    			multiplix = Utile.multiplicateur[(int)n]; 
+    	    	
+    	    	if (gmp == 0) {
+    	    		n = Utile.generate(3);
+        			multiplix = Utile.multiplicateur[(int)n]; 
+    	    	}
+    	    	
     			sumDistTotale = supermanager.verifTicketSum(mapTicket, coderace, str, multiplix);
     			_str = str;
     			if(gmp != 0) { //two sides knife
@@ -458,6 +475,8 @@ public class ControlDisplayKeno implements Runnable{
 	    		long timeBefore = System.currentTimeMillis();
 	    		double max = 0;
 	    		double min = gMp;
+	    		long timeAfter;
+	    		boolean fail = true;
 	    		
 	    		do {
 	    			combis.clear();
@@ -476,27 +495,62 @@ public class ControlDisplayKeno implements Runnable{
 	    	    		str = str + combi.get(k) + "-";
 	    	    	}
 	    	    	str = str + combi.get(19);
-	    	    	double n = Utile.generate(4);
+	    	    	n = Utile.generate(4);
 	    			multiplix = Utile.multiplicateur[(int)n]; 
-	    	//		System.out.println("sumDistTotale coderace "+str);
+	    			//System.out.println("sumDistTotale coderace "+str);
 	    			sumDistTotale = supermanager.verifTicketSum(mapTicket, coderace, str, multiplix);
-	    	//		System.out.println("sumDistTotale sumDistTotale "+sumDistTotale);
-	    			if(sumDistTotale <= sumdist && sumDistTotale >= max) {
-	    			//	System.out.println("HERE 1 sumDistTotale "+sumDistTotale);
-	    				_str = str;
-	    				max = sumDistTotale;
-	    			//	System.out.println("max = sumDistTotale "+max);
-	    			}
-	    			long timeAfter = System.currentTimeMillis() - timeBefore;
 	    			
-	    			if(timeAfter > 8000) {
-	    				trouve = true;
-	    				this.rtp = sumdist - max;
-	    				System.out.println("timeAfter "+timeAfter+" max: "+max);
-	    				sumDistTotale = max;
-	    			}  
+	    			if (gmp != 0) {
+	    				System.out.println("gmp != 0 "+gmp+ " sumdist: "+sumdist);
+	    				if(sumdist <= gmp) {
+	    					if (sumDistTotale == gmp) {
+	    						trouve = true;
+	    	    				this.rtp = sumdist - max;
+	    	    				timeAfter = System.currentTimeMillis() - timeBefore;
+	    	    				_str = str;
+	    	    				sumDistTotale = max;
+	    					}
+	    					// wha I should do
+	    					
+	    				}
+	    				else {
+	    					timeAfter = System.currentTimeMillis() - timeBefore;
+	    					if(sumDistTotale <= sumdist && sumDistTotale >= max) {
+	    						_str = str;
+	    	    				max = sumDistTotale;
+	    					}
+	    					
+	    					if(timeAfter > 8000) {
+	    	    				trouve = true;
+	    	    				this.rtp = sumdist - max;
+	    	    				System.out.println("timeAfter "+timeAfter+" max: "+max);
+	    	    				sumDistTotale = max;
+	    	    			}  
+	    				}
+	    			}
+	    			else {
+	    			//	System.out.println("gmp = 0 "+gmp+ " sumdist: "+sumDistTotale);
+	    				if (sumDistTotale == 0 && fail) { // tirage par defaut
+	    					_str = str;
+	    					fail = false;
+	    				}
+	    				timeAfter = System.currentTimeMillis() - timeBefore;
+    					if(sumDistTotale <= sumdist && sumDistTotale >= max) {
+    						_str = str;
+    	    				max = sumDistTotale;
+    					}
+    					
+    					if(timeAfter > 8000) {
+    	    				trouve = true;
+    	    				this.rtp = sumdist - max;
+    	    				System.out.println("timeAfter "+timeAfter+" max: "+max);
+    	    				sumDistTotale = max;
+    	    			}  
+	    			}	
 	    		}
 	    		while(!trouve);
+	    		System.out.println("sumDistTotale "+sumDistTotale);
+	    		
 	    	}	
 	    	this.rtp = (double)((int)(this.rtp*100))/100;
 	    	//System.out.println("DISTRIBUTION: "+sumDistTotale+" ReFund: "+this.rtp);

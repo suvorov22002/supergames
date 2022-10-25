@@ -1,6 +1,9 @@
 package com.pyramid.dev.daoimpl;
 
 import java.util.List;
+import java.util.Optional;
+
+import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -10,7 +13,10 @@ import org.springframework.stereotype.Repository;
 
 import com.pyramid.dev.dao.Misek_tempDAO;
 import com.pyramid.dev.exception.DAOException;
+import com.pyramid.dev.model.Keno;
 import com.pyramid.dev.model.Misek_temp;
+import com.pyramid.dev.model.Partner;
+import com.pyramid.dev.tools.KenoDTO;
 import com.pyramid.dev.tools.QueryHelper;
 
 @Repository
@@ -38,7 +44,12 @@ public class Misek_tempDAOImpl implements Misek_tempDAO {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Misek_temp> query = currentSession.createQuery("from Misek_temp where idmisek=:idmisek ", Misek_temp.class);
 			query.setParameter("idmisek", misek);
-			mtp = query.getSingleResult();
+			//mtp = query.getSingleResult();
+			Optional<Misek_temp> q = query.uniqueResultOptional();
+			if (q.isPresent()) {
+				mtp = q.get();
+				return mtp;
+			}
 		}catch(Exception e) {
 			System.err.println("MSTP - PAS DE TICKET TEMPORAIRES");
 		}
@@ -71,6 +82,17 @@ public class Misek_tempDAOImpl implements Misek_tempDAO {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Misek_temp> query = currentSession.createQuery(QueryHelper.SQL_F_M_MISEK_ID, Misek_temp.class);
 		  
+		List<Misek_temp> mtp = query.getResultList();
+		return mtp;
+	}
+
+	@Override
+	public List<Misek_temp> waitingDrawBet(int drawnum, Partner p) throws DAOException {
+		Session currentSession = sessionFactory.getCurrentSession();
+		Query<Misek_temp> query = currentSession.createQuery(QueryHelper.SQL_F_TMP, Misek_temp.class);
+		query.setParameter("drawnum", drawnum)
+			 .setParameter("partner", p);
+		
 		List<Misek_temp> mtp = query.getResultList();
 		return mtp;
 	}

@@ -5,6 +5,7 @@ import java.util.List;
 import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.AdminTicketDto;
 import com.pyramid.dev.model.Caissier;
+import com.pyramid.dev.model.EffChoicek;
 import com.pyramid.dev.model.Keno;
 import com.pyramid.dev.model.Misek;
 import com.pyramid.dev.model.Miset;
@@ -33,4 +34,6 @@ public interface MisekService {
 	int findId(Miset miset) throws DAOException;
 	int updateMiseRK(Caissier caissier, String date, String date1) throws DAOException;
 	List<Misek> searchAllMisek(Partner partner) throws DAOException;
+	List<EffChoicek> waitingKenoBet(Partner partner, int drawnum) throws DAOException;
+	int updateAll(List<Misek> list) throws DAOException;
 }

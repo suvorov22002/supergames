@@ -14,6 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.pyramid.dev.enums.EtatMise;
 
 @Entity
@@ -175,4 +177,46 @@ public class Misek implements Serializable{
 	public void setMiset(Miset miset) {
 		this.miset = miset;
 	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+//		hash = 31 * hash + bonusCod;
+//		hash = 31 * hash + idMiseK.hashCode();
+		hash = 31 + idMiseK.hashCode();
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		
+//		if(this == obj) {
+//			return true;
+//		}
+//		if(obj == null || (obj.getClass() != this.getClass())) {
+//			return false;
+//		}
+		System.out.println("Comparable this: "+this.toString());
+		
+		if (obj instanceof Misek) {
+			
+			Misek mise = (Misek) obj;
+			System.out.println("Comparable: "+mise.toString());
+			
+			if (this.idMiseK.equals(mise.idMiseK)) {
+				return true;
+			}
+			
+		}
+		
+		return false;
+		
+	}
+
+	@Override
+	public String toString() {
+		return "[ BonusCode = " + this.bonusCod + " , Caissier = " + this.caissier.getLoginc() + " , Partner = " + this.caissier.getPartner().getCoderace() + 
+				" , ID = " + this.idMiseK + " , IDT = " + this.miset.getIdMiseT() + " ]";
+	}
+	
 }

@@ -30,7 +30,7 @@ public class PartnerDAOImpl implements PartnerDAO {
 	private SessionFactory sessionFactory;
 	
 	@Override
-	public Response create(Partner partner) throws DAOException {
+	public boolean create(Partner partner) throws DAOException {
 		boolean status = false;
 		Partner part;
 		try {
@@ -38,10 +38,11 @@ public class PartnerDAOImpl implements PartnerDAO {
 			status = true;
 		}catch(DAOException e) {
 			e.printStackTrace();
-			return null;
 			//return Response.ok(PartnerDTO.getInstance().event(partner).error(e.getMessage())).build();
 		}
-		return Response.ok(PartnerDTO.getInstance().event(partner).sucess("")).build();
+		
+		return status;
+		
 		//return Response.ok().entity(part).build();
 	}
 
@@ -52,7 +53,11 @@ public class PartnerDAOImpl implements PartnerDAO {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Partner> query = currentSession.createQuery("from Partner WHERE coderace =:coderace ", Partner.class);
 			query.setParameter("coderace", partner.getCoderace());
-			p = query.getSingleResult();
+			//p = query.getSingleResult();
+			Optional<Partner> q = query.uniqueResultOptional();
+			if (q.isPresent()) {
+				p = q.get();
+			}
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

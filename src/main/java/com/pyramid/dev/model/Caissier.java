@@ -25,7 +25,7 @@ import com.pyramid.dev.enums.Connect;
 @Entity
 @Table( name="caissier",
 		uniqueConstraints = {
-				@UniqueConstraint(columnNames = {"idPartner", "loginc"})})
+				@UniqueConstraint(columnNames = {"coderace", "loginc"})})
 public class Caissier implements Serializable {
 
 	/**
@@ -52,7 +52,7 @@ public class Caissier implements Serializable {
     
     @JsonIgnore
     @ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="idPartner")
+	@JoinColumn(name="coderace")
     private Partner partner;
     
 //    @ManyToOne(fetch=FetchType.EAGER)

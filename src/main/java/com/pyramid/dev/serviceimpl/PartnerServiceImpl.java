@@ -2,20 +2,16 @@ package com.pyramid.dev.serviceimpl;
 
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pyramid.dev.PartnerRepository;
 import com.pyramid.dev.dao.PartnerDAO;
 import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.Partner;
 import com.pyramid.dev.model.PartnerDto;
 import com.pyramid.dev.service.PartnerService;
 import com.pyramid.dev.tools.ControlDisplayKeno;
-import com.pyramid.dev.tools.PartnerDTO;
 
 @Service
 @Transactional
@@ -28,7 +24,7 @@ public class PartnerServiceImpl implements PartnerService {
 //	private PartnerRepository partnerRepo;
 	
 	@Override
-	public Response create(Partner partner) throws DAOException {
+	public boolean create(Partner partner) throws DAOException {
 		
 		//Partner part = partnerRepo.findByCoderace(partner.getCoderace());
 		

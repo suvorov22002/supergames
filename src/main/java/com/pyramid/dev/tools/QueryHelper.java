@@ -120,6 +120,13 @@ public class QueryHelper {
 			+ "(From Caissier Where partner=:partner)";
 	public static final String SQL_F_WAITING_KENO_BET = "From Misek where etatMise =:etatmise And drawnumk =:drawnumk And caissier in"
 			+ "(From Caissier Where partner=:partner) order by idmisek asc ";//ticket joué pour un tour
+	
+
+	//public static final String SQL_F_WAITING_EFFCHK = "Select e From EffChoicek e INNER JOIN e.misek m where m.etatMise =:etatmise And m.drawnumk =:drawnumk And m.caissier in"
+	//		+ "(From Caissier Where partner=:partner)";//ticket joué pour un tour
+	public static final String SQL_F_WAITING_EFFCHK = "Select e From EffChoicek e, Misek m where e.misek = m And m.etatMise =:etatmise And e.drawnum =:drawnumk And m.caissier in"
+			+ "(From Caissier Where partner=:partner)";//ticket joué pour un tour
+	
 	public static final String SQL_F_WAITING_KENO_BET_2 = "order by idMiseK ASC";
 	public static final String SQL_F_COMPTA_CYCLE = "SELECT SUM(sumMise) FROM  Misek WHERE  idMiseK > :idMiseK And idmisek < :idMiseK1 And caissier in "
 			+ "(From Caissier Where partner=:partner)";
@@ -138,6 +145,9 @@ public class QueryHelper {
 	/* MisekTemp queries */
 	public static final String SQL_U_MISEK_ID = "Update Misek_temp Set etatMise = etatMise + 1 where idmisek=:idmisek ";
 	public static final String SQL_F_M_MISEK_ID = "From Misek_temp Where multi != etatMise ";
+	public static final String SQL_F_TMP = "From Misek_temp t Where multi != etatMise and t.idmisek in "
+			+ "(Select m.idMiseK From Misek m Where drawnumk =: drawnum And caissier in (From Caissier Where partner =:partner))";
+	
 	
 	/* EffChoicekDAO queries */
 	

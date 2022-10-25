@@ -61,7 +61,7 @@ public class MouvementDAOImpl implements MouvementDAO {
 				mvt = q.get();
 			}
 		}catch(Exception e) {
-			System.err.print(e);
+			e.printStackTrace();
 		}
 		return mvt;
 	}
@@ -69,13 +69,14 @@ public class MouvementDAOImpl implements MouvementDAO {
 	@Override
 	public double findMvt(Caissier caissier) throws DAOException {
 		double balance = 0;
+		//System.out.println("----- "+caissier.getLoginc());
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
 			balance =  (double) currentSession.createQuery(QueryHelper.SQL_F_MVT)
 			.setParameter("caissier", caissier)
 			.getSingleResult();
 		}catch(Exception e) {
-			System.err.print(e);
+			e.printStackTrace();
 		}
 		
 		return balance;

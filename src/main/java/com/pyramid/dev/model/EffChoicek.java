@@ -33,7 +33,7 @@ public class EffChoicek implements Serializable {
 	private String idparil;
 	
 	@JsonIgnore
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="idMiseK")
 	private Misek misek;
 	

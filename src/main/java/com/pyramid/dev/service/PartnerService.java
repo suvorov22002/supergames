@@ -11,7 +11,7 @@ import com.pyramid.dev.tools.ControlDisplayKeno;
 
 public interface PartnerService {
 	
-	Response create(Partner partner) throws DAOException;
+	boolean create(Partner partner) throws DAOException;
 	Partner find(Partner partner) throws DAOException;
 	boolean update(Partner partner) throws DAOException;
 	void delete(Partner partner) throws DAOException;

@@ -16,7 +16,7 @@ public class CaissierDto implements Serializable{
 	private String nomc;
 	private String loginc;
 	private String mdpc;
-	private Long partner;
+	private String partner;
 	private String statut;
 	private int grpe;
 	private double airtime;
@@ -65,11 +65,11 @@ public class CaissierDto implements Serializable{
 		this.mdpc = mdpc;
 	}
 
-	public Long getPartner() {
+	public String getPartner() {
 		return partner;
 	}
 
-	public void setPartner(Long partner) {
+	public void setPartner(String partner) {
 		this.partner = partner;
 	}
 
@@ -101,7 +101,7 @@ public class CaissierDto implements Serializable{
 		this.idCaissier = c.getIdCaissier();
 		this.nomc = c.getNomC();
 		this.loginc = c.getLoginc();
-		this.partner = c.getPartner().getIdpartner();
+		this.partner = c.getPartner().getCoderace();
 		this.profil = c.getProfil().getId();
 		this.mdpc = c.getMdpc();
 		this.statut = "C";

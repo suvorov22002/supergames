@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.pyramid.dev.dao.Misek_tempDAO;
 import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.Misek_temp;
+import com.pyramid.dev.model.Partner;
 import com.pyramid.dev.service.Misek_tempService;
 
 @Transactional
@@ -44,6 +45,11 @@ public class Misek_tempServiceImpl implements Misek_tempService {
 	@Override
 	public List<Misek_temp> searchWaitingBet() throws DAOException {
 		return mtpdao.searchWaitingBet();
+	}
+
+	@Override
+	public List<Misek_temp> waitingDrawBet(int drawnum, Partner p) throws DAOException {
+		return mtpdao.waitingDrawBet(drawnum, p);
 	}
 
 }

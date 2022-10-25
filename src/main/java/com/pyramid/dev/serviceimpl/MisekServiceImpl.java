@@ -11,6 +11,7 @@ import com.pyramid.dev.dao.MisekDAO;
 import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.AdminTicketDto;
 import com.pyramid.dev.model.Caissier;
+import com.pyramid.dev.model.EffChoicek;
 import com.pyramid.dev.model.Keno;
 import com.pyramid.dev.model.Misek;
 import com.pyramid.dev.model.Miset;
@@ -132,6 +133,16 @@ public class MisekServiceImpl implements MisekService {
 	@Override
 	public List<Misek> searchAllMisek(Partner partner) throws DAOException {
 		return misekdao.searchAllMisek(partner);
+	}
+
+	@Override
+	public List<EffChoicek> waitingKenoBet(Partner partner, int drawnum) throws DAOException {
+		return misekdao.waitingKenoBet(partner, drawnum);
+	}
+
+	@Override
+	public int updateAll(List<Misek> list) throws DAOException {
+		return misekdao.updateAll(list);
 	}
 
 }

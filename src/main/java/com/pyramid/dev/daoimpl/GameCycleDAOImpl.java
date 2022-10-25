@@ -109,7 +109,7 @@ public class GameCycleDAOImpl implements GameCycleDAO {
 			}
 		}
 		catch(Exception e) {
-			System.err.print(e);
+			e.printStackTrace();
 			return cycle;
 		}
 		

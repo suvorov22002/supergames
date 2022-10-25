@@ -15,6 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Type;
+
 import com.pyramid.dev.enums.Jeu;
 
 @Entity
@@ -60,7 +62,8 @@ public class GameCycle implements Serializable {
 	@Column(nullable=false, columnDefinition="int default 1")
 	private int position;
 	
-	@Column
+	@Column(length=65535, columnDefinition="TEXT")
+	@Type(type="text")
 	private String arrangement = "1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18-19-20";
 	
 	@Column(nullable=false)
