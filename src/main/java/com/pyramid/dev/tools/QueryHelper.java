@@ -146,7 +146,7 @@ public class QueryHelper {
 	public static final String SQL_U_MISEK_ID = "Update Misek_temp Set etatMise = etatMise + 1 where idmisek=:idmisek ";
 	public static final String SQL_F_M_MISEK_ID = "From Misek_temp Where multi != etatMise ";
 	public static final String SQL_F_TMP = "From Misek_temp t Where multi != etatMise and t.idmisek in "
-			+ "(Select m.idMiseK From Misek m Where drawnumk =: drawnum And caissier in (From Caissier Where partner =:partner))";
+			+ "(Select m.idMiseK From Misek m Where caissier in (From Caissier Where partner =:partner))";
 	
 	
 	/* EffChoicekDAO queries */

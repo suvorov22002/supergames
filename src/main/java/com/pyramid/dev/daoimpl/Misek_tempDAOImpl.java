@@ -90,8 +90,9 @@ public class Misek_tempDAOImpl implements Misek_tempDAO {
 	public List<Misek_temp> waitingDrawBet(int drawnum, Partner p) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Misek_temp> query = currentSession.createQuery(QueryHelper.SQL_F_TMP, Misek_temp.class);
-		query.setParameter("drawnum", drawnum)
-			 .setParameter("partner", p);
+//		query.setParameter("drawnum", drawnum)
+//			 .setParameter("partner", p);
+		query.setParameter("partner", p);
 		
 		List<Misek_temp> mtp = query.getResultList();
 		return mtp;
