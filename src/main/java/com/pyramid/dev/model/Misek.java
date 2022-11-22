@@ -196,17 +196,14 @@ public class Misek implements Serializable{
 //		if(obj == null || (obj.getClass() != this.getClass())) {
 //			return false;
 //		}
-		System.out.println("Comparable this: "+this.toString());
+//		System.out.println("Comparable this: "+this.toString());
 		
 		if (obj instanceof Misek) {
-			
 			Misek mise = (Misek) obj;
-			System.out.println("Comparable: "+mise.toString());
-			
+//			System.out.println("Comparable: "+mise.toString());
 			if (this.idMiseK.equals(mise.idMiseK)) {
 				return true;
 			}
-			
 		}
 		
 		return false;

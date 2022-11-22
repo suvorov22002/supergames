@@ -4,26 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.pyramid.dev.business.RefreshK;
 import com.pyramid.dev.business.SuperGameManager;
-import com.pyramid.dev.exception.DAOException;
+import com.pyramid.dev.enums.Jeu;
+import com.pyramid.dev.model.GameCycle;
 import com.pyramid.dev.model.Keno;
 import com.pyramid.dev.model.Misek;
 import com.pyramid.dev.model.Miset;
 import com.pyramid.dev.model.Partner;
+import com.pyramid.dev.model.TraceCycle;
+import com.pyramid.dev.service.GameCycleService;
 import com.pyramid.dev.service.KenoService;
 
 @Component
 public class ControlDisplayKeno implements Runnable{
 		
 	
-	SuperGameManager supermanager;
 	
-	
+	private SuperGameManager supermanager;
 	private KenoService kenoservice;
 	
 	private String coderace;
@@ -50,11 +51,9 @@ public class ControlDisplayKeno implements Runnable{
 	private boolean canbet = true; //mise possible
 	private double sumdist;
 	private Map<Miset, Misek> mapTicket;
-	private double gMp;
-	private double gmp;
+	private double gMp, gmp;
 	private Map<String, String> rescue;
-	private double bonuskamount;
-	private double bonusPamount;
+	private double bonuskamount, bonusPamount;
 	private String heureTirage;
 	private boolean draw_finish = false;
 	private int refill;
@@ -63,6 +62,7 @@ public class ControlDisplayKeno implements Runnable{
 	private Long barcodeCagnot = 0L;
 	private Long miseCagnot = 0L;
 	private Long idCagnot = 0L;
+	private TraceCycle trCycle;
 
 	
 	private static Thread thread;
@@ -392,6 +392,14 @@ public class ControlDisplayKeno implements Runnable{
 	public void setRescue(Map<String, String> rescue) {
 		this.rescue = rescue;
 	}
+	
+	public TraceCycle getTrCycle() {
+		return trCycle;
+	}
+
+	public void setTrCycle(TraceCycle trCycle) {
+		this.trCycle = trCycle;
+	}
 
 	public Keno lastDrawNum(Partner partner){
 		Keno keno = null;
@@ -407,8 +415,6 @@ public class ControlDisplayKeno implements Runnable{
 	
     private String buscarDraw(double sumdist,Map<Miset, Misek> mapTicket,double gMp,double gmp){
 		
-		List<String> combis = new ArrayList<String>();
-    	List<String> combi = new ArrayList<String>();
     	double sumDistTotale = 0;
     	double n;
     	boolean trouve = false;
@@ -417,6 +423,10 @@ public class ControlDisplayKeno implements Runnable{
 	    System.out.println("GMP: "+gMp+" GmP: "+gmp+" DIST: "+sumdist);	
 	//    System.out.println("mapTicket: "+mapTicket.size());	
 	//    if(sumdist <= gmp || sumdist==0) {
+	   
+	    trCycle = new TraceCycle();
+	    trCycle.setCoderace(coderace);
+	    trCycle.setKeno(this.drawNumk);
 	    	
 	    if(sumdist <= 0) {
     		System.out.println("----- NOTHING TO DISTIBUTE -- OR 2KNIFESIDES: "+ gmp);
@@ -425,22 +435,7 @@ public class ControlDisplayKeno implements Runnable{
 	    	}
     		
     		do {
-    			combis.clear();
-    			combi.clear();
-    			str = "";
-    			for(int i=1;i<81;i++)
-    	    		combis.add(""+i);
-    	    	for(int j=0;j<80;j++){
-    	    		int index = Utile.generate(combis.size());
-    	    		combi.add(combis.get(index));
-    	    		combis.remove(index);
-    	    	}
-    	    	
-    	    	
-    	    	for(int k=0;k<19;k++){
-    	    		str = str + combi.get(k) + "-";
-    	    	}
-    	    	str = str + combi.get(19);
+    			str = extractDraw();
     	    	
     	    	if (gmp == 0) {
     	    		n = Utile.generate(3);
@@ -473,111 +468,122 @@ public class ControlDisplayKeno implements Runnable{
 	    else if(sumdist > 0) {
 	    		System.out.println("HERE 1");	
 	    		long timeBefore = System.currentTimeMillis();
-	    		double max = 0;
+	    		double maxi = 0;
 	    		double min = gMp;
 	    		long timeAfter;
 	    		boolean fail = true;
 	    		
+	    		if (gmp != 0) {
+		    		multiplix = Utile.multiplicateur[3]; 
+		    	}
+	    		
 	    		do {
-	    			combis.clear();
-	    			combi.clear();
-	    			str = "";
-	    			for(int i=1;i<81;i++)
-	    	    		combis.add(""+i);
-	    	    	for(int j=0;j<80;j++){
-	    	    		int index = Utile.generate(combis.size());
-	    	    		combi.add(combis.get(index));
-	    	    		combis.remove(index);
+	    			str = extractDraw();
+	    	    	
+	    	    	if (gmp == 0) {
+	    	    		n = Utile.generate(4);
+		    			multiplix = Utile.multiplicateur[(int)n]; 
 	    	    	}
 	    	    	
-	    	    	
-	    	    	for(int k=0;k<19;k++){
-	    	    		str = str + combi.get(k) + "-";
-	    	    	}
-	    	    	str = str + combi.get(19);
-	    	    	n = Utile.generate(4);
-	    			multiplix = Utile.multiplicateur[(int)n]; 
 	    			//System.out.println("sumDistTotale coderace "+str);
 	    			sumDistTotale = supermanager.verifTicketSum(mapTicket, coderace, str, multiplix);
-	    			
+	    		
 	    			if (gmp != 0) {
 	    				System.out.println("gmp != 0 "+gmp+ " sumdist: "+sumdist);
 	    				if(sumdist <= gmp) {
 	    					if (sumDistTotale == gmp) {
 	    						trouve = true;
-	    	    				this.rtp = sumdist - max;
+	    	    				this.rtp = sumdist - maxi;
 	    	    				timeAfter = System.currentTimeMillis() - timeBefore;
 	    	    				_str = str;
-	    	    				sumDistTotale = max;
+	    	    				sumDistTotale = maxi;
 	    					}
 	    					// wha I should do
 	    					
 	    				}
 	    				else {
 	    					timeAfter = System.currentTimeMillis() - timeBefore;
-	    					if(sumDistTotale <= sumdist && sumDistTotale >= max) {
+	    					if(sumDistTotale <= sumdist && sumDistTotale > maxi) {
 	    						_str = str;
-	    	    				max = sumDistTotale;
+	    	    				maxi = sumDistTotale;
 	    					}
 	    					
 	    					if(timeAfter > 8000) {
 	    	    				trouve = true;
-	    	    				this.rtp = sumdist - max;
-	    	    				System.out.println("timeAfter "+timeAfter+" max: "+max);
-	    	    				sumDistTotale = max;
+	    	    				this.rtp = sumdist - maxi;
+	    	    		//		System.out.println("timeAfter "+timeAfter+" max: "+max);
+	    	    				sumDistTotale = maxi;
 	    	    			}  
 	    				}
 	    			}
 	    			else {
-	    			//	System.out.println("gmp = 0 "+gmp+ " sumdist: "+sumDistTotale);
-	    				if (sumDistTotale == 0 && fail) { // tirage par defaut
+	    				//System.out.println("gmp == 0 "+gmp+ " sumdist: "+sumDistTotale);
+	    				if (sumDistTotale == 0 && fail && maxi == 0) { // tirage de garde
 	    					_str = str;
 	    					fail = false;
 	    				}
 	    				timeAfter = System.currentTimeMillis() - timeBefore;
-    					if(sumDistTotale <= sumdist && sumDistTotale >= max) {
+    					if(sumDistTotale <= sumdist && sumDistTotale > maxi) {
     						_str = str;
-    	    				max = sumDistTotale;
+    	    				maxi = sumDistTotale;
     					}
     					
     					if(timeAfter > 8000) {
     	    				trouve = true;
-    	    				this.rtp = sumdist - max;
-    	    				System.out.println("timeAfter "+timeAfter+" max: "+max);
-    	    				sumDistTotale = max;
+    	    				this.rtp = sumdist - maxi;
+    	    				//System.out.println("Return to Player: "+this.rtp);
+    	    				sumDistTotale = maxi;
     	    			}  
 	    			}	
 	    		}
 	    		while(!trouve);
-	    		System.out.println("sumDistTotale "+sumDistTotale);
+	    		//System.out.println("sumDistTotale "+sumDistTotale);
 	    		
 	    	}	
 	    	this.rtp = (double)((int)(this.rtp*100))/100;
-	    	//System.out.println("DISTRIBUTION: "+sumDistTotale+" ReFund: "+this.rtp);
-	    setMultiplix(multiplix);
+	    	System.out.println("DISTRIBUTION: "+sumDistTotale+" ReFund: "+this.rtp);
+	   
+	    	setMultiplix(multiplix);
+	    	trCycle.setSumDist(sumDistTotale);
+	    
 		return _str;
 	}
 
+	private String extractDraw() {
+		
+		String str;
+		int index;
+		List<String> combis = new ArrayList<>();
+		List<String> combi = new ArrayList<>();
+		combis.clear();
+		combi.clear();
+		str = "";
+		for(int i=1;i<81;i++) combis.add(String.valueOf(i));
+		
+		for(int j=0;j<80;j++){
+			index = Utile.generate(combis.size());
+			combi.add(combis.get(index));
+			combis.remove(index);
+		}
+		
+		
+		for(int k=0;k<19;k++){
+			str = str + combi.get(k) + "-";
+		}
+		str = str + combi.get(19);
+		return str;
+	}
+
 	public String buscarDraw() {
-		List<String> combis = new ArrayList<String>();
-		List<String> combi = new ArrayList<String>();
-		for(int i=1;i<81;i++)
-	    		combis.add(""+i);
-	    	for(int j=0;j<80;j++){
-	    		int index = Utile.generate(combis.size());
-	    		combi.add(combis.get(index));
-	    		combis.remove(index);
-	    	}
-	    	
-	    	String str = "";
-	    	for(int k=0;k<19;k++){
-	    		str = str + combi.get(k) + "-";
-	    	}
-	    	str = str + combi.get(19);
-	    	double n = Utile.generate(4);
-			multiplix = Utile.multiplicateur[(int)n]; 
-			setMultiplix(multiplix);
-			return str;
+		
+		double n = Utile.generate(4);
+		String str = "";
+		str = extractDraw();
+		
+		multiplix = Utile.multiplicateur[(int)n]; 
+		setMultiplix(multiplix);
+		
+		return str;
 	}
 	
 	

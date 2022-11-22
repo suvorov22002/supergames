@@ -20,6 +20,7 @@ public class GameCycleDto implements Serializable{
 	private double stake;
 	private double payout;
 	private double jkpt;
+	private double real_percent;
 	
 	public GameCycleDto() {
 		
@@ -152,11 +153,20 @@ public class GameCycleDto implements Serializable{
 	public void setJkpt(double jkpt) {
 		this.jkpt = jkpt;
 	}
-	
+
+	public double getReal_percent() {
+		return real_percent;
+	}
+
+	public void setReal_percent(double real_percent) {
+		this.real_percent = real_percent;
+	}
+
 	public GameCycleDto transToGameCycle(GameCycle c) {
 		this.archive = c.getArchive();
 		this.arrangement = c.getArrangement();
 		this.curr_percent = c.getCurr_percent();
+		this.real_percent = c.getReal_percent();
 		this.date_fin = c.getDate_fin().substring(0, 10);
 		this.hitfrequence = c.getHitfrequence();
 		this.jeu = c.getJeu().getValue();

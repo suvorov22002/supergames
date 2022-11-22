@@ -8,17 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.aspectj.lang.annotation.RequiredTypes;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,6 +54,7 @@ import com.pyramid.dev.model.PartnerDto;
 import com.pyramid.dev.model.Profil;
 import com.pyramid.dev.model.ResponseData;
 import com.pyramid.dev.model.ShiftDay;
+import com.pyramid.dev.model.TraceCycle;
 import com.pyramid.dev.model.Versement;
 import com.pyramid.dev.responsecode.ResponseHolder;
 import com.pyramid.dev.service.AirtimeService;
@@ -73,6 +70,7 @@ import com.pyramid.dev.service.Misek_tempService;
 import com.pyramid.dev.service.MisetService;
 import com.pyramid.dev.service.MouvementService;
 import com.pyramid.dev.service.PartnerService;
+import com.pyramid.dev.service.TraceCycleService;
 import com.pyramid.dev.service.VersementService;
 import com.pyramid.dev.tools.BetTicketKDTO;
 import com.pyramid.dev.tools.BonusSetDTO;
@@ -107,6 +105,7 @@ public class Controller {
 	private final ConfigService cfgservice;
 	private final MisetService mstservice;
 	private final GameCycleService gmcservice;
+	private final TraceCycleService traceservice;
 	private final MisekService mskservice;
 	private final Misek_tempService mstpservice;
 	private final EffChoicekService efkservice;
@@ -491,8 +490,7 @@ public class Controller {
 					    				bonusWinAmount = k_keno.getBonusKamount();
 					    				if(bonusWinAmount != 0) {
 				    					   bonusDown = true;
-				    					   bonusWinCode = k_keno.getBonusKcod();
-					    					   
+				    					   bonusWinCode = k_keno.getBonusKcod(); 
 					    				}
 					    				
 					    				if(k_keno.getStarted() == 1){
@@ -525,13 +523,15 @@ public class Controller {
 								    		   _montant_evt = _montant_evt + Double.parseDouble(tick.getMtchoix());
 								    		   gain_total = gain_total + odd * Double.parseDouble(tick.getMtchoix());
 								    		  
-								    		   System.out.println("MULTIPLICATEUR MULTI: "+xmulti+" KENO MULTI: "+xtiplicateur+" GAIN: "+gain_total);
+								    	//	   System.out.println("MULTIPLICATEUR MULTI: "+xmulti+" KENO MULTI: "+xtiplicateur+" GAIN: "+gain_total);
 								    		   // verifie si le multiplicateur a été activé sur le ticket
 								    		   if(xmulti != 0) {
 								    			   gain_total = gain_total * xtiplicateur;
 								    		   }
 								    		   gain_total = (double)((int)(gain_total*100))/100;
+								    		   
 								    		   System.out.println(" GAIN FINAL: "+gain_total);
+								    		   
 								    		   tick.setMtwin(gain_total);
 								    		   tick.setState(true);
 								    		   
@@ -544,9 +544,11 @@ public class Controller {
 												tick.setState(false);
 											}
 								    		
-								    		 
+								    	//	System.out.println("bonusWinCode: "+bonusWinCode+" , bonusTicketCode: "+bonusTicketCode);
 								    	    if(bonusDown) {
+								    	    	System.out.println("bonusWinCode: "+bonusWinCode+" , bonusTicketCode: "+bonusTicketCode);
 								    		   if(bonusWinCode == bonusTicketCode) {
+								    			   betk.setBonus(Boolean.TRUE);
 								    			   gain_total = gain_total + bonusWinAmount;
 								    			   gain_total = (double)((int)(gain_total*100))/100;
 								    		   }
@@ -940,7 +942,7 @@ public class Controller {
 					Misek_temp misektp = new Misek_temp();
 					misektp.setMulti(multiplicite);
 					misektp.setSumMise(mise_min);
-					misektp.setEtatMise(1);
+					misektp.setEtatMise(0);
 					misektp.setIdmisek(misek.getIdMiseK());
 					ajout = mstpservice.create(misektp);
 					
@@ -1072,8 +1074,6 @@ public class Controller {
 				
 		//		log.info("Nouvelle ligne de tirage added "+line );
 				if(line){
-				//	log.info("num added "+num_tirage );
-				//	log.info("Mise a jour du cycle");
 					log.info("[CONTROLLER MISE A JOUR DU CYCLE] "+cds.getCoderace());
 					cycleAJour(cds);
 					cds.setDrawNumk(num_tirage);
@@ -1205,6 +1205,8 @@ public class Controller {
 			percent = gmc.getPercent();
 			arrang = gmc.getArrangement();
 			arrangement = arrang.split("-");
+			
+			System.out.println("Position: "+position+" Rounsize: "+roundSize);
 
 			cds.setPos(position);
 			cds.setArrangement(gmc.getArrangement());
@@ -1222,7 +1224,7 @@ public class Controller {
 			//		log.info("waiting bet partner: "+partner.getCoderace()+"  cds.getDrawNumk: "+cds.getDrawNumk());
 
 			// recherche de tous les tickets en attentes du tour
-			listTicket = mskservice.searchWaitingKenoBet(p, num);
+			listTicket = mskservice.searchWaitingKenoBet(p, num, EtatMise.ATTENTE);
 
 			System.out.println("EFFCHOICE NUM "+listTicket.size() + " -- "+num);
 		//	listEffchk =  mskservice.waitingKenoBet(p, num);
@@ -1243,7 +1245,7 @@ public class Controller {
 					listTicket.add(mk);
 				}
 			}
-			System.out.println("listTicket NUM "+listTicket.size() + " -- "+num);
+			
 
 			mapTicket.clear();
 			miseTotale = miseTotale + refill;
@@ -1286,7 +1288,9 @@ public class Controller {
 
 				xtour = (int) (miseTotale/Params.MISE_MIN);
 				refill = (int) (miseTotale%Params.MISE_MIN);
-				// log.info("refill: "+refill+" xtour Pos: "+xtour);
+				log.info("refill: "+refill+" xtour Pos: "+xtour);
+				
+				cds.setRefill(refill);
 				nvlepos = position + xtour;
 				int pp = position + 1;
 				log.info("Position: "+position+" Nvelle Pos: "+nvlepos);
@@ -1303,26 +1307,32 @@ public class Controller {
 				}
 
 				log.info("Percent: "+percent+" RoundSize: "+roundSize+" Tour: "+tour+" Bonus: "+bonusrate);
+				
+				// Montant moyen à distribuer lors d'un tour gagnant
 				double rounded = supermanager.getRoundPayed(percent, roundSize, tour, bonusrate);
 
 				log.info("xdist: "+xdist+" rounded: "+rounded);
-				sumdist = (miseTotale_s*percent)/100 + xdist * rounded;
+				sumdist = (miseTotale_s*percent)/100 + xdist * rounded; // ajout du montant debordé lors de la fin du cycle
 				log.info("miseTotale_s: "+miseTotale_s+"   sumdist: "+sumdist);
 
 				if(xdist != 0) {
 					sumdist = sumdist + cds.getRtp();
 				}
 				else{
-					if((position > Integer.parseInt(arrangement[arrangement.length-1]) && position <= tour && cds.getRtp() > 0) || (cds.getRtp() >= rounded)) {
+					if((position > Integer.parseInt(arrangement[arrangement.length-1]) && position <= tour && cds.getRtp() > 0) 
+							|| (cds.getRtp() >= rounded) || miseTotale_s > 0 ) {
 						xdist = 1;
 						sumdist = sumdist +cds.getRtp();
 					}
-					else if(miseTotale_s > 0) {
-						xdist = 1;
-						sumdist = sumdist + cds.getRtp();
-					}
-					//										
+//					else if(miseTotale_s > 0) {
+//						xdist = 1;
+//						sumdist = sumdist + cds.getRtp();
+//					}
+//					//										
 				}
+				
+				System.out.println("CDS BONUSKAMOUNT: " + p.getBonuskamount());
+//				sumdist = sumdist - p.getBonuskamount();
 
 				position = nvlepos;
 				cds.setPos(position);
@@ -1344,24 +1354,16 @@ public class Controller {
 						Thread.sleep(1000);
 					}
 
-
-					//	if(!dead_round) {
-					// gmcDao.updateRfp(cds.getRtp(), idPartner, "K");
-					log.info("contoller set pos "+cds.getPos());
-					//	   gmcservice.updatePos(cds.getPos(), p, Jeu.K);
-
-					for(Misek m : listTicket) {
-						if(m.getDrawnumk() != cds.getDrawNumk()) {
-							mtpservice.update(m.getIdMiseK());
-						}
-
-					}
-					//	}
-
+					TraceCycle trc = cds.getTrCycle();
+					trc.setCycle(gmc);
+					
 					//MISE A JOUR DE GAME_CYCLE
 
 					//	 if(!dead_round) {
 					gmcservice.updateRfp(cds.getRtp(), p, Jeu.K);
+					traceservice.create(trc);
+					
+					cds.setTrCycle(trc);
 					//	 }
 
 					String str_draw = "";					         
@@ -1951,10 +1953,11 @@ public class Controller {
 			 
 			 List<Keno> lm = kenoservice.getLastKdraw(p);
 			 List<KenoRes> lknr = new ArrayList<>(lm.size());
-			 KenoRes kenr = new KenoRes();
+			 //KenoRes kenr = new KenoRes();
 			 
-			 for (Keno k : lm) {
-				 kenr = new KenoRes();
+			 lm = lm.stream().filter(k -> k.getStarted() != 0).collect(Collectors.toList());
+			 lm.forEach(k -> {
+				 KenoRes kenr = new KenoRes();
 				 kenr.setBonuscod(k.getBonusKcod());
 				 kenr.setBonusKamount(k.getBonusKamount());
 				 kenr.setHeureTirage(k.getHeureTirage().replace(':', 'h').replace(',', '-'));
@@ -1963,7 +1966,19 @@ public class Controller {
 				 kenr.setMultiplicateur(k.getMultiplicateur());
 				 kenr.setStr_draw_combi(k.getDrawnumbK());
 				 lknr.add(kenr);
-			 }
+			 });
+			 
+//			 for (Keno k : lm) {
+//				 kenr = new KenoRes();
+//				 kenr.setBonuscod(k.getBonusKcod());
+//				 kenr.setBonusKamount(k.getBonusKamount());
+//				 kenr.setHeureTirage(k.getHeureTirage().replace(':', 'h').replace(',', '-'));
+//				 kenr.setDrawnumbK(k.getDrawnumbK());
+//				 kenr.setDrawnumK(k.getDrawnumK());
+//				 kenr.setMultiplicateur(k.getMultiplicateur());
+//				 kenr.setStr_draw_combi(k.getDrawnumbK());
+//				 lknr.add(kenr);
+//			 }
 			 
 			 ob.put("bonus", lknr);
 			 String eve = Utile.convertJsonToString(ob);

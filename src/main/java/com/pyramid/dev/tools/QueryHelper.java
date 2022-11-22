@@ -128,9 +128,9 @@ public class QueryHelper {
 			+ "(From Caissier Where partner=:partner)";//ticket joué pour un tour
 	
 	public static final String SQL_F_WAITING_KENO_BET_2 = "order by idMiseK ASC";
-	public static final String SQL_F_COMPTA_CYCLE = "SELECT SUM(sumMise) FROM  Misek WHERE  idMiseK > :idMiseK And idmisek < :idMiseK1 And caissier in "
+	public static final String SQL_F_COMPTA_CYCLE = "SELECT SUM(sumMise) FROM  Misek WHERE  idMiseK > :idMiseK And idmisek <= :idMiseK1 And caissier in "
 			+ "(From Caissier Where partner=:partner)";
-	public static final String SQL_F_COMPTA_CYCLE_WIN = "SELECT SUM(sumWin) FROM Misek WHERE  idMiseK > :idMiseK And idMiseK < :idMiseK1 And caissier in "
+	public static final String SQL_F_COMPTA_CYCLE_WIN = "SELECT SUM(sumWin) FROM Misek WHERE  idMiseK > :idMiseK And idMiseK <= :idMiseK1 And caissier in "
 			+ "(From Caissier Where partner=:partner)";
 	public static final String SQL_F_MAX_PARTNER_ID = "SELECT MAX(idMiseK) FROM Misek WHERE miset=:miset ";
 	public static final String SQL_U_COMPTA = "Update  Misek Set archive = 1 WHERE  caissier =:caissier AND  heureMise BETWEEN :heur1 AND :heur2 AND archive = 0 ";
@@ -182,4 +182,10 @@ public class QueryHelper {
 	public static final String SQL_U_CAGNOTTE = " Update Cagnotte Set barcode =: barcode, mise =: mise Where idCagnotte =: id";
 	public static final String SQL_C_CAGNOTTE = "Insert into Cagnotte Set lot =:lot , jour =:jour , heure =:heur , partner =:partner ";
 	
+	/* TraceCycle Helper */
+	
+	public static final String SQL_F_TRACE = "From TraceCycle Where keno =:keno And coderace =:coderace And "
+			+ "id = (Select max(id) From TraceCycle Where keno =:keno1 And coderace =:coderace1)";
+	public static final String SQL_F_TRACE_GMC = "From TraceCycle Where cycle =:gmcycle";
+	public static final String SQL_F_TRACE_PARTNER = "From TraceCycle Where coderace =:coderace";
 }

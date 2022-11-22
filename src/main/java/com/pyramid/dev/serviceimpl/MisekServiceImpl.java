@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.pyramid.dev.dao.MisekDAO;
+import com.pyramid.dev.enums.EtatMise;
 import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.AdminTicketDto;
 import com.pyramid.dev.model.Caissier;
@@ -106,8 +107,8 @@ public class MisekServiceImpl implements MisekService {
 	}
 
 	@Override
-	public List<Misek> searchWaitingKenoBet(Partner partner, int drawnum) throws DAOException {
-		return misekdao.searchWaitingKenoBet(partner, drawnum);
+	public List<Misek> searchWaitingKenoBet(Partner partner, int drawnum, EtatMise etat) throws DAOException {
+		return misekdao.searchWaitingKenoBet(partner, drawnum, etat);
 	}
 
 	@Override

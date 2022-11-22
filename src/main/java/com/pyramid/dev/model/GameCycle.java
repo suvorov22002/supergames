@@ -81,6 +81,9 @@ public class GameCycle implements Serializable {
 	@Column
 	private String date_fin = "01/01/2015-12:00:00";;
 	
+	@Column(nullable=false, columnDefinition="int default 0")
+	private double real_percent = 0d;
+	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="idPartner")
     private Partner partner;
@@ -223,6 +226,14 @@ public class GameCycle implements Serializable {
 
 	public void setPartner(Partner partner) {
 		this.partner = partner;
+	}
+
+	public double getReal_percent() {
+		return real_percent;
+	}
+
+	public void setReal_percent(double real_percent) {
+		this.real_percent = real_percent;
 	}
 	
 }

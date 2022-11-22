@@ -2,6 +2,7 @@ package com.pyramid.dev.service;
 
 import java.util.List;
 
+import com.pyramid.dev.enums.EtatMise;
 import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.AdminTicketDto;
 import com.pyramid.dev.model.Caissier;
@@ -28,7 +29,7 @@ public interface MisekService {
 	int searchDrawNumK(Keno keno) throws DAOException;
 	List<Misek> searchMiseKdraw(Keno keno, int num) throws DAOException;
 	List<Misek> searchWaitingBet(Partner partner, int drawnum) throws DAOException;
-	List<Misek> searchWaitingKenoBet(Partner partner, int drawnum) throws DAOException;
+	List<Misek> searchWaitingKenoBet(Partner partner, int drawnum, EtatMise etat) throws DAOException;
 	double getMiseKCycle(Long misek, Long mise, Partner partner) throws DAOException;
 	double getMiseKCycleWin(long misek, long mise,Partner partner) throws DAOException;
 	int findId(Miset miset) throws DAOException;

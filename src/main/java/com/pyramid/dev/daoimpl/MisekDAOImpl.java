@@ -269,7 +269,7 @@ public class MisekDAOImpl implements MisekDAO {
 
 	@Override
 	public List<Misek> searchMiseKdraw(Keno keno, int num) throws DAOException {
-		System.out.println("NUM: "+keno.getDrawnumK()+" = "+num);
+		
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Misek> query = currentSession.createQuery(QueryHelper.SQL_F_MISEK_DRAWNUMK, Misek.class);
 		query.setParameter("drawnumk", num)
@@ -292,14 +292,14 @@ public class MisekDAOImpl implements MisekDAO {
 	}
 
 	@Override
-	public List<Misek> searchWaitingKenoBet(Partner partner, int drawnum) throws DAOException {
+	public List<Misek> searchWaitingKenoBet(Partner partner, int drawnum, EtatMise etat) throws DAOException {
 		
 		List<Misek> misk = new ArrayList<Misek>();
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Misek> query =  currentSession.createQuery(QueryHelper.SQL_F_WAITING_KENO_BET,  Misek.class);
 			query.setParameter("drawnumk", drawnum)
-			     .setParameter("etatmise",EtatMise.ATTENTE)
+			     .setParameter("etatmise",etat)
 			     .setParameter("partner", partner);
 	
 			misk = query.getResultList();
