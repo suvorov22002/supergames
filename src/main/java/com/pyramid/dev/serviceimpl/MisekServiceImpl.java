@@ -57,7 +57,7 @@ public class MisekServiceImpl implements MisekService {
 	}
 
 	@Override
-	public Misek searchMisesK(Miset miset) throws DAOException {
+	public List<Misek> searchMisesK(Miset miset) throws DAOException {
 		return misekdao.searchMisesK(miset);
 	}
 
@@ -112,7 +112,7 @@ public class MisekServiceImpl implements MisekService {
 	}
 
 	@Override
-	public double getMiseKCycle(Long misek, Long mise, Partner partner) throws DAOException {
+	public List<Misek> getMiseKCycle(Long misek, Long mise, Partner partner) throws DAOException {
 		return misekdao.getMiseKCycle(misek, mise, partner);
 	}
 
@@ -145,5 +145,10 @@ public class MisekServiceImpl implements MisekService {
 	public int updateAll(List<Misek> list) throws DAOException {
 		return misekdao.updateAll(list);
 	}
+
+//	@Override
+//	public Misek searchMisesK(Miset miset, int drawnum) throws DAOException {
+//		return misekdao.searchMisesK(miset, drawnum);
+//	}
 
 }

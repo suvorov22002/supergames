@@ -5,6 +5,8 @@ public class QueryHelper {
 	/* KenoDAO queries */
 	public static final String SQL_F_MAX_DRAW = "from Keno k where k.partner=:coderace and k.drawnumK in "
 			+ "(select max(drawnumK) from Keno where partner=:coderace1)";
+	public static final String SQL_MAX_DRAW = "select max(drawnumK) from Keno where partner=:coderace";
+	public static final String SQL_MAX_KENO = "From Keno k Where k.drawnumK =: drawnum And  k.partner=:coderace ";
 	
 	public static final String SQL_F_MAX_PREVIOUS_DRAW = "From Keno K Where K.partner=:coderace And"
 			+ " K.drawnumK = (Select max(drawnumK) from Keno where partner=:coderace1 And multiplicateur!='0')";
@@ -96,7 +98,8 @@ public class QueryHelper {
 	public static final String SQL_F_MAX_MISEK_CODERACE = "FROM Misek Where caissier in "
 			+ "(From Caissier Where partner=:partner) order by idMiseK asc";
 	public static final String SQL_F_MISEK_MAX_ID = "SELECT MAX(idMiseK) FROM Misek";
-	public static final String SQL_F_MISEK_MISET = "FROM Misek WHERE miset =:miset ";
+	public static final String SQL_F_MISEK_MISET = "FROM Misek WHERE miset =:miset";
+	public static final String SQL_F_MISEK_MISET_DRAW = "FROM Misek WHERE miset =:miset and drawnumk =:drawnumk";
 	public  static final String SQL_F_MISEK_ID = "FROM Misek WHERE idMiseK =:idMiseK ";
 //	public static final String SQL_F_DRAW_NUM = "SELECT DISTINCT m.drawnumk from Misek m,EffChoicek f WHERE m.idMiseK =:misek AND "
 //			+ "m.idMiseK = f.idMiseK ";
@@ -128,8 +131,10 @@ public class QueryHelper {
 			+ "(From Caissier Where partner=:partner)";//ticket joué pour un tour
 	
 	public static final String SQL_F_WAITING_KENO_BET_2 = "order by idMiseK ASC";
-	public static final String SQL_F_COMPTA_CYCLE = "SELECT SUM(sumMise) FROM  Misek WHERE  idMiseK > :idMiseK And idmisek <= :idMiseK1 And caissier in "
+	public static final String SQL_F_COMPTA_CYCLE = "FROM  Misek WHERE  idMiseK > :idMiseK And idmisek <= :idMiseK1 And caissier in "
 			+ "(From Caissier Where partner=:partner)";
+//	public static final String SQL_F_COMPTA_CYCLE4 = "SELECT SUM(sumMise) FROM  Misek WHERE  idMiseK > :idMiseK And idmisek <= :idMiseK1 And caissier in "
+//			+ "(From Caissier Where partner=:partner)";
 	public static final String SQL_F_COMPTA_CYCLE_WIN = "SELECT SUM(sumWin) FROM Misek WHERE  idMiseK > :idMiseK And idMiseK <= :idMiseK1 And caissier in "
 			+ "(From Caissier Where partner=:partner)";
 	public static final String SQL_F_MAX_PARTNER_ID = "SELECT MAX(idMiseK) FROM Misek WHERE miset=:miset ";
@@ -177,10 +182,11 @@ public class QueryHelper {
 	
 	/* CagnotteDAO queries */
 	
-	public static final String SQL_F_CAGNOTTE = "From Cagnotte Where partner =:partner and idCagnotte = (Select max(idCagnotte) from Cagnotte where partner =: partner1 ) ";
+	public static final String SQL_F_CAGNOTTE = "From Cagnotte Where partner =:partner and status ='OPENED' and day <= :day ";
 	
 	public static final String SQL_U_CAGNOTTE = " Update Cagnotte Set barcode =: barcode, mise =: mise Where idCagnotte =: id";
 	public static final String SQL_C_CAGNOTTE = "Insert into Cagnotte Set lot =:lot , jour =:jour , heure =:heur , partner =:partner ";
+	public static final String SQL_F_CAGNOTTE_PARTNER = "From Cagnotte where partner =:partner and status = 'OPENED'";
 	
 	/* TraceCycle Helper */
 	

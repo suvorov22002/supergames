@@ -119,48 +119,48 @@ public class CagnotWorker {
 	
 	private static void process(ControlDisplayKeno cds) {
 		
-	//	System.out.println(cagnotservice + " __ " +cds);
-    	Cagnotte cagnot = cagnotservice.find(cds.getPartner());
-    	
-    	if (cagnot == null ) return;
-    	String heur = cagnot.getHeur() + ":00";
-    	String dat = cagnot.getDay();
-    	String[] li_dat = dat.split("-");
-    	Collections.reverse(Arrays.asList(li_dat));
-    	dat = "";
-    	for (String ss : li_dat) {
-    		dat = dat + "/" + ss;
-    	}
-    	
-    	dat = dat.substring(1);
-    //	System.out.println("dat __ " +dat + "," + heur);
-    	
-    	String txtDate = new SimpleDateFormat("dd/MM/yyyy,H:m:s", Locale.FRANCE).format(new Date());
-			long tms0,tms;
-			try {
-				tms = Utile.givetimestamp(dat + "," + heur);
-				tms0 = Utile.givetimestamp(txtDate);
-				
-				if(tms < tms0) {
-					// mise à jour de la tombée de la cagnotte
-					//System.out.println("- "+cagnot.getLot()+"\n- "+cagnot.getJeu());
-					if (cagnot.getJeu() == null || StringUtils.isBlank(cagnot.getJeu())) {
-						cagnot.setJeu("FALL");
-						cagnotservice.update(cagnot);
-					}
-					else if (cagnot.getBarcode() == 0){
-						System.out.println("NOT PAID");
-					}
-					else {
-						System.out.println("ALREADY PAID");
-					}
-	
-				}
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
-    	
+//	//	System.out.println(cagnotservice + " __ " +cds);
+//    	Cagnotte cagnot = cagnotservice.find(cds.getPartner());
+//    	
+//    	if (cagnot == null ) return;
+//    	String heur = cagnot.getHeur() + ":00";
+//    	Date dat = cagnot.getDay();
+//    	String[] li_dat = dat.split("-");
+//    	Collections.reverse(Arrays.asList(li_dat));
+//    	dat = "";
+//    	for (String ss : li_dat) {
+//    		dat = dat + "/" + ss;
+//    	}
+//    	
+//    	dat = dat.substring(1);
+//    //	System.out.println("dat __ " +dat + "," + heur);
+//    	
+//    	String txtDate = new SimpleDateFormat("dd/MM/yyyy,H:m:s", Locale.FRANCE).format(new Date());
+//			long tms0,tms;
+//			try {
+//				tms = Utile.givetimestamp(dat + "," + heur);
+//				tms0 = Utile.givetimestamp(txtDate);
+//				
+//				if(tms < tms0) {
+//					// mise à jour de la tombée de la cagnotte
+//					//System.out.println("- "+cagnot.getLot()+"\n- "+cagnot.getJeu());
+//					if (cagnot.getJeu() == null || StringUtils.isBlank(cagnot.getJeu())) {
+//						cagnot.setJeu("FALL");
+//						cagnotservice.update(cagnot);
+//					}
+//					else if (cagnot.getBarcode() == 0){
+//						System.out.println("NOT PAID");
+//					}
+//					else {
+//						System.out.println("ALREADY PAID");
+//					}
+//	
+//				}
+//			}
+//			catch(Exception e) {
+//				e.printStackTrace();
+//			}
+//    	
 		return;
 	}
 	

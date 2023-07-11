@@ -32,6 +32,9 @@ public class Misek implements Serializable{
 	private Long idMiseK;
 	
 	@Column
+	private Long numeroTicket;
+	
+	@Column
 	private String heureMise;
 	
 	@Column(nullable=false, columnDefinition="int default 0")
@@ -80,6 +83,14 @@ public class Misek implements Serializable{
 
 	public void setIdMiseK(Long idMiseK) {
 		this.idMiseK = idMiseK;
+	}
+	
+	public Long getNumeroTicket() {
+		return numeroTicket;
+	}
+
+	public void setNumeroTicket(Long numeroTicket) {
+		this.numeroTicket = numeroTicket;
 	}
 
 	public String getHeureMise() {

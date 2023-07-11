@@ -48,7 +48,7 @@ public class GameCycle implements Serializable {
 	private int hitfrequence;
 	
 	@Column
-	private double refundp = 0d;
+	private int refundp = 0;
 	
 	@Column
 	private double stake = 0d;
@@ -132,11 +132,11 @@ public class GameCycle implements Serializable {
 		this.hitfrequence = hitfrequence;
 	}
 
-	public double getRefundp() {
+	public int getRefundp() {
 		return refundp;
 	}
 
-	public void setRefundp(double refundp) {
+	public void setRefundp(int refundp) {
 		this.refundp = refundp;
 	}
 
@@ -235,5 +235,14 @@ public class GameCycle implements Serializable {
 	public void setReal_percent(double real_percent) {
 		this.real_percent = real_percent;
 	}
+
+	@Override
+	public String toString() {
+		return "GameCycle [percent=" + percent + ", tour=" + tour + ", hitfrequence=" + hitfrequence + ", refundp="
+				+ refundp + ", mise=" + mise + ", misef=" + misef + ", archive=" + archive + ", date_fin=" + date_fin
+				+ ", partner=" + partner + "]";
+	}
+	
+	
 	
 }

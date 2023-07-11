@@ -16,13 +16,13 @@ public class CagnotteDTO  extends ResponseBase{
 	@JsonIgnore
 	private static final long serialVersionUID = 1L;
 	
-	private Cagnotte cagnot;
+	private CagnotteDto cagnot;
 	
 	public CagnotteDTO() {
 		super();
 	}
 
-	public CagnotteDTO(String code, String error, String message, Cagnotte cagnot) {
+	public CagnotteDTO(String code, String error, String message, CagnotteDto cagnot) {
 		super();
 		this.setCode(code);
 		this.setError(error);
@@ -39,7 +39,7 @@ public class CagnotteDTO  extends ResponseBase{
 		return new CagnotteDTO();
 	}
 
-	public CagnotteDTO event(Cagnotte ca) {
+	public CagnotteDTO event(CagnotteDto ca) {
 		this.setCagnot(ca);
 		return this;
 	}
@@ -55,11 +55,11 @@ public class CagnotteDTO  extends ResponseBase{
 		return this;
 	}
 
-	public Cagnotte getCagnot() {
+	public CagnotteDto getCagnot() {
 		return cagnot;
 	}
 
-	public void setCagnot(Cagnotte cagnot) {
+	public void setCagnot(CagnotteDto cagnot) {
 		this.cagnot = cagnot;
 	}
 

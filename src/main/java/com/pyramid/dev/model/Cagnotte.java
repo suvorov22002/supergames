@@ -1,9 +1,12 @@
 package com.pyramid.dev.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,8 +14,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pyramid.dev.enums.Room;
 
 
 
@@ -30,11 +35,9 @@ public class Cagnotte implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long idCagnotte;
 	
+	@JsonIgnore
 	@Column
-	private String day;
-	
-	@Column
-	private String heur;
+	private Date day;
 	
 	@Column
 	private String lot;
@@ -57,41 +60,33 @@ public class Cagnotte implements Serializable {
 	@Column(name = "idmise")
 	private long mise;
 	
+	@JsonIgnore
+	@Column
+	@Enumerated(EnumType.STRING)
+	private Room status = Room.OPENED;
+	
+	@JsonIgnore
+	@Column
+	private Date createdAt;
+	
 	@Transient
 	private long idpart;
+	
+	@Transient
+	private String heur;
 	
 	public Cagnotte() {
 		
 	}
-
-	public Cagnotte(String day, String heur, String lot, String jeu, Partner partner, int mise, long barcode, int give) {
-		super();
-		this.day = day;
-		this.heur = heur;
-		this.lot = lot;
-		this.jeu = jeu;
-		this.partner = partner;
-		this.mise = mise;
-		this.barcode = barcode;
-		this.give = give;
-	}
-
-	public String getDay() {
+	
+	public Date getDay() {
 		return day;
 	}
 
-	public void setDay(String day) {
+	public void setDay(Date day) {
 		this.day = day;
 	}
-
-	public String getHeur() {
-		return heur;
-	}
-
-	public void setHeur(String heur) {
-		this.heur = heur;
-	}
-
+	
 	public String getLot() {
 		return lot;
 	}
@@ -156,4 +151,30 @@ public class Cagnotte implements Serializable {
 		this.idpart = idpart;
 	}
 
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Room getStatus() {
+		return status;
+	}
+
+	public void setStatus(Room status) {
+		this.status = status;
+	}
+
+	public String getHeur() {
+		return heur;
+	}
+
+	public void setHeur(String heur) {
+		this.heur = heur;
+	}
+	
+	
+	
 }

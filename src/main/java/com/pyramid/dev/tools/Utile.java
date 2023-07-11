@@ -1,26 +1,24 @@
 package com.pyramid.dev.tools;
 
-import java.sql.ResultSet;
+
+
+
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.pyramid.dev.business.RefreshK;
-import com.pyramid.dev.enums.Jeu;
-import com.pyramid.dev.model.GameCycle;
-import com.pyramid.dev.model.Misek;
-import com.pyramid.dev.model.Miset;
 
 
 public class Utile {
@@ -35,20 +33,35 @@ public class Utile {
 	public static double bonusKmin = 0.0;
 	public static double bonusrate;
 	public static List<Long> barcodeKenoPool;
+//	public static double num10[] = {0,0,0,1,2,3,5,10,200,2000,10000};
+//	public static double num9[] = {0,0,0,1,2,3,25,100,1500,9000};
+//	public static double num8[] = {0,0,0,1,4,15,50,1200,8000};
+//	public static double num7[] = {0,0,0,1,3,30,220,3000};
+//	public static double num6[] = {0,0,1,2,10,60,800};
+//	public static double num5[] = {0,0,1,3,30,500};
+//	public static double num4[] = {0,0,2,10,100};
+//	public static double num3[] = {0,1,3,50};
+//	public static double num2[] = {0,1,10};
+//	public static double numAll[] = {0,4.1,14.5,60.5,275,1400,6500};
+//	public static double numOut[] = {0,1.7,2.1,2.5,3.2,4.2,5.5,7.5,10,13.5,18.5};
+//	public static double numSpec[] = {1.85,1.87,3.80};
 	public static double num10[] = {0,0,0,1,2,3,5,10,200,2000,10000};
 	public static double num9[] = {0,0,0,1,2,3,25,100,1500,9000};
-	public static double num8[] = {0,0,0,1,4,15,50,1200,8000};
+	public static double num8[] = {0,0,0,1,2,6,50,1200,8000};//{0,0,0,1,4,15,50,1200,8000};
 	public static double num7[] = {0,0,0,1,3,30,220,3000};
-	public static double num6[] = {0,0,1,2,10,60,800};
-	public static double num5[] = {0,0,1,3,30,500};
-	public static double num4[] = {0,0,2,10,100};
-	public static double num3[] = {0,1,3,50};
-	public static double num2[] = {0,1,10};
-	public static double numAll[] = {0,4.1,14.5,60.5,275,1400,6500};
-	public static double numOut[] = {0,1.7,2.1,2.5,3.2,4.2,5.5,7.5,10,13.5,18.5};
+	public static double num6[] = {0,0,1,2,3,25,800};
+	public static double num5[] = {0,0,1,2,8,500};
+	public static double num4[] = {0,0,2,4,75};
+	public static double num3[] = {0,1,2,10};
+	public static double num2[] = {0,1,8};
+	public static double numAll[] = {0,3.6,14,60,275,1400,6500};
+	public static double numOut[] = {0,1.2,1.6,2,2.7,3.7,5,7,9.5,13,18};
 	public static double numSpec[] = {1.85,1.87,3.80};
 	
 	public static RefreshK ref = new RefreshK();
+	
+	public static final DecimalFormat df = new DecimalFormat("0.00");
+	public static final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", Locale.FRANCE);
 	
 	public static int _checkExistingSameDisplayCoderace(String coderace){
 		
@@ -81,48 +94,48 @@ public class Utile {
 	}
 
 
-	public JSONArray convertResultSetToJsonArrays(ResultSet resultSet) throws SQLException
-	{                  
-		JSONArray json = new JSONArray();
-		ResultSetMetaData metadata = resultSet.getMetaData();
-		int numColumns = metadata.getColumnCount();
-
-		while(resultSet.next()){
-			JSONObject obj = new JSONObject(); 
-			for (int i = 1; i <= numColumns; ++i){
-				String column_name = metadata.getColumnName(i);
-				Object value = resultSet.getObject(column_name);
-				if(StringUtils.endsWithIgnoreCase("inti", column_name)) {
-					String rep = StringUtils.replace(value.toString(),";","");
-					rep = StringUtils.replace(value.toString(),",","");
-					rep = StringUtils.replace(value.toString(),","," ");
-					obj.put(column_name,rep );
-				}else {
-					obj.put(column_name,value);
-				}
-			}
-			json.put(obj);
-		}
-		return json;
-	}
-
-
-	public JSONObject convertResultSetToJsonObject(ResultSet resultSet) throws SQLException
-	{
-		JSONObject json = new JSONObject();
-		ResultSetMetaData metadata = resultSet.getMetaData();
-		int numColumns = metadata.getColumnCount();
-
-		if(resultSet.next()){
-			JSONObject obj = new JSONObject(); 
-			for (int i = 1; i <= numColumns; ++i){
-				String column_name = metadata.getColumnName(i);
-				obj.put(column_name, resultSet.getObject(column_name));
-			}
-			json = obj;
-		}
-		return json;
-	}
+//	public JSONArray AconvertResultSetToJsonArrays(ResultSet resultSet) throws SQLException
+//	{                  
+//		JSONArray json = new JSONArray();
+//		ResultSetMetaData metadata = resultSet.getMetaData();
+//		int numColumns = metadata.getColumnCount();
+//
+//		while(resultSet.next()){
+//			JSONObject obj = new JSONObject(); 
+//			for (int i = 1; i <= numColumns; ++i){
+//				String column_name = metadata.getColumnName(i);
+//				Object value = resultSet.getObject(column_name);
+//				if(StringUtils.endsWithIgnoreCase("inti", column_name)) {
+//					String rep = StringUtils.replace(value.toString(),";","");
+//					rep = StringUtils.replace(value.toString(),",","");
+//					rep = StringUtils.replace(value.toString(),","," ");
+//					obj.put(column_name,rep );
+//				}else {
+//					obj.put(column_name,value);
+//				}
+//			}
+//			json.put(obj);
+//		}
+//		return json;
+//	}
+//
+//
+//	public JSONObject convertResultSetToJsonObjects(ResultSet resultSet) throws SQLException
+//	{
+//		JSONObject json = new JSONObject();
+//		ResultSetMetaData metadata = resultSet.getMetaData();
+//		int numColumns = metadata.getColumnCount();
+//
+//		if(resultSet.next()){
+//			JSONObject obj = new JSONObject(); 
+//			for (int i = 1; i <= numColumns; ++i){
+//				String column_name = metadata.getColumnName(i);
+//				obj.put(column_name, resultSet.getObject(column_name));
+//			}
+//			json = obj;
+//		}
+//		return json;
+//	}
 	
 	public static long givetimestamp(String str) throws ParseException{
 		DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy,HH:mm:ss");

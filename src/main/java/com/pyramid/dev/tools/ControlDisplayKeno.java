@@ -44,7 +44,7 @@ public class ControlDisplayKeno implements Runnable{
 	private int end = 0;
 	private int pos;
 	private double bonusrate;
-	private double rtp;
+	private int rtp;
 	private String multiplix;
 	private String arrangement = "";
 	private int tour;
@@ -63,6 +63,8 @@ public class ControlDisplayKeno implements Runnable{
 	private Long miseCagnot = 0L;
 	private Long idCagnot = 0L;
 	private TraceCycle trCycle;
+	private double miseTotale;
+	private double gainTotal;
 
 	
 	private static Thread thread;
@@ -84,7 +86,7 @@ public class ControlDisplayKeno implements Runnable{
 	}
 
 	public void run() {
-		RefreshK.RESULT = buscarDraw(sumdist,mapTicket,gMp,gmp);
+		RefreshK.RESULT = buscarDraw(this.sumdist, this.mapTicket, this.gMp, this.gmp);
 		this.drawCombik = RefreshK.RESULT;
 		System.out.println("Refresh.RESULT "+this.drawCombik);
 		setDrawCombik(RefreshK.RESULT);
@@ -164,11 +166,11 @@ public class ControlDisplayKeno implements Runnable{
 		this.pos = pos;
 	}
 
-	public double getRtp() {
+	public int getRtp() {
 		return rtp;
 	}
 
-	public void setRtp(double rtp) {
+	public void setRtp(int rtp) {
 		this.rtp = rtp;
 	}
 
@@ -400,6 +402,22 @@ public class ControlDisplayKeno implements Runnable{
 	public void setTrCycle(TraceCycle trCycle) {
 		this.trCycle = trCycle;
 	}
+	
+	public double getMiseTotale() {
+		return miseTotale;
+	}
+
+	public void setMiseTotale(double miseTotale) {
+		this.miseTotale = miseTotale;
+	}
+
+	public double getGainTotal() {
+		return gainTotal;
+	}
+
+	public void setGainTotal(double gainTotal) {
+		this.gainTotal = gainTotal;
+	}
 
 	public Keno lastDrawNum(Partner partner){
 		Keno keno = null;
@@ -420,6 +438,7 @@ public class ControlDisplayKeno implements Runnable{
     	boolean trouve = false;
     	String str = ""; 
     	String _str = "";
+    	String multiplicateur;
 	    System.out.println("GMP: "+gMp+" GmP: "+gmp+" DIST: "+sumdist);	
 	//    System.out.println("mapTicket: "+mapTicket.size());	
 	//    if(sumdist <= gmp || sumdist==0) {
@@ -430,25 +449,26 @@ public class ControlDisplayKeno implements Runnable{
 	    	
 	    if(sumdist <= 0) {
     		System.out.println("----- NOTHING TO DISTIBUTE -- OR 2KNIFESIDES: "+ gmp);
-    		if (gmp != 0) {
-	    		multiplix = Utile.multiplicateur[3]; 
-	    	}
+    		//if (gmp != 0) {
+	    		multiplicateur = Utile.multiplicateur[3]; 
+	    	//}
     		
     		do {
     			str = extractDraw();
     	    	
-    	    	if (gmp == 0) {
-    	    		n = Utile.generate(3);
-        			multiplix = Utile.multiplicateur[(int)n]; 
-    	    	}
+//    	    	if (gmp == 0) {
+//    	    		n = Utile.generate(3);
+//        			multiplix = Utile.multiplicateur[(int)n]; 
+//    	    	}
     	    	
-    			sumDistTotale = supermanager.verifTicketSum(mapTicket, coderace, str, multiplix);
+    			sumDistTotale = supermanager.verifTicketSum(mapTicket, coderace, str, multiplicateur);
     			_str = str;
+    			setMultiplix(multiplicateur);
     			if(gmp != 0) { //two sides knife
     				if(sumDistTotale == gmp) {
     					//System.out.println("this.rtpAAA "+this.rtp);
         				trouve = true;
-        				this.rtp = this.rtp + sumdist - sumDistTotale;
+        				this.rtp = (int) (this.rtp + sumdist - sumDistTotale);
         				
         			}
     			}
@@ -466,37 +486,41 @@ public class ControlDisplayKeno implements Runnable{
     	}    
 	  //  else if(sumdist > gMp) {
 	    else if(sumdist > 0) {
-	    		System.out.println("HERE 1");	
+	    		System.out.println("HERE 1");
 	    		long timeBefore = System.currentTimeMillis();
 	    		double maxi = 0;
 	    		double min = gMp;
 	    		long timeAfter;
 	    		boolean fail = true;
 	    		
-	    		if (gmp != 0) {
-		    		multiplix = Utile.multiplicateur[3]; 
-		    	}
+	    		// couteau tranchant
+	    		multiplicateur = Utile.multiplicateur[3]; 
+		    	
 	    		
 	    		do {
 	    			str = extractDraw();
 	    	    	
 	    	    	if (gmp == 0) {
 	    	    		n = Utile.generate(4);
-		    			multiplix = Utile.multiplicateur[(int)n]; 
+	    	    		multiplicateur = Utile.multiplicateur[(int)n]; 
 	    	    	}
 	    	    	
 	    			//System.out.println("sumDistTotale coderace "+str);
-	    			sumDistTotale = supermanager.verifTicketSum(mapTicket, coderace, str, multiplix);
+	    			sumDistTotale = supermanager.verifTicketSum(mapTicket, coderace, str, multiplicateur);
+	    			//System.out.println("sumDistTotale "+sumDistTotale + " result: " + str);
 	    		
 	    			if (gmp != 0) {
-	    				System.out.println("gmp != 0 "+gmp+ " sumdist: "+sumdist);
+	    				//System.out.println("gmp != 0 "+gmp+ " sumdist: "+sumdist+" sumdistotale: "+sumDistTotale);
 	    				if(sumdist <= gmp) {
+	    					
 	    					if (sumDistTotale == gmp) {
 	    						trouve = true;
-	    	    				this.rtp = sumdist - maxi;
-	    	    				timeAfter = System.currentTimeMillis() - timeBefore;
+	    						
+	    	    				this.rtp = 0;
+	    	    				
 	    	    				_str = str;
-	    	    				sumDistTotale = maxi;
+	    	    				setMultiplix(multiplicateur);
+	    	    				
 	    					}
 	    					// wha I should do
 	    					
@@ -506,32 +530,37 @@ public class ControlDisplayKeno implements Runnable{
 	    					if(sumDistTotale <= sumdist && sumDistTotale > maxi) {
 	    						_str = str;
 	    	    				maxi = sumDistTotale;
+	    	    				setMultiplix(multiplicateur);
 	    					}
-	    					
+	    					//System.out.println("gmp != 0 "+gmp+ " sumdist: "+sumdist+" sumdistotale: "+sumDistTotale+" _str: "+_str);
 	    					if(timeAfter > 8000) {
 	    	    				trouve = true;
-	    	    				this.rtp = sumdist - maxi;
+	    	    				this.rtp = (int) (sumdist - maxi);
 	    	    		//		System.out.println("timeAfter "+timeAfter+" max: "+max);
 	    	    				sumDistTotale = maxi;
 	    	    			}  
 	    				}
 	    			}
 	    			else {
-	    				//System.out.println("gmp == 0 "+gmp+ " sumdist: "+sumDistTotale);
+	    				
 	    				if (sumDistTotale == 0 && fail && maxi == 0) { // tirage de garde
+	    					//System.out.println("tirage de garde: "+str);
 	    					_str = str;
+	    					setMultiplix(multiplicateur);
 	    					fail = false;
 	    				}
 	    				timeAfter = System.currentTimeMillis() - timeBefore;
     					if(sumDistTotale <= sumdist && sumDistTotale > maxi) {
+    						//System.out.println("tirage REUSSI: "+str);
     						_str = str;
     	    				maxi = sumDistTotale;
+    	    				setMultiplix(multiplicateur);
     					}
     					
     					if(timeAfter > 8000) {
     	    				trouve = true;
-    	    				this.rtp = sumdist - maxi;
-    	    				//System.out.println("Return to Player: "+this.rtp);
+    	    				this.rtp = (int) (sumdist - maxi);
+    	    				System.out.println("Return to Player: "+this.rtp);
     	    				sumDistTotale = maxi;
     	    			}  
 	    			}	
@@ -540,10 +569,10 @@ public class ControlDisplayKeno implements Runnable{
 	    		//System.out.println("sumDistTotale "+sumDistTotale);
 	    		
 	    	}	
-	    	this.rtp = (double)((int)(this.rtp*100))/100;
+	    	
+	        this.gainTotal += sumDistTotale;
 	    	System.out.println("DISTRIBUTION: "+sumDistTotale+" ReFund: "+this.rtp);
 	   
-	    	setMultiplix(multiplix);
 	    	trCycle.setSumDist(sumDistTotale);
 	    
 		return _str;
@@ -553,8 +582,8 @@ public class ControlDisplayKeno implements Runnable{
 		
 		String str;
 		int index;
-		List<String> combis = new ArrayList<>();
-		List<String> combi = new ArrayList<>();
+		List<String> combis = new ArrayList<>(80);
+		List<String> combi = new ArrayList<>(80);
 		combis.clear();
 		combi.clear();
 		str = "";

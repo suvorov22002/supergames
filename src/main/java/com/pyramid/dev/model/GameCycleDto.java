@@ -2,12 +2,14 @@ package com.pyramid.dev.model;
 
 import java.io.Serializable;
 
+import com.pyramid.dev.tools.Utile;
+
 public class GameCycleDto implements Serializable{
 	
 	private double percent;
 	private int tour;
 	private int hitfrequence;
-	private double refundp;
+	private int refundp;
 	private int position;
 	private String arrangement;
 	private Long partner;
@@ -50,11 +52,11 @@ public class GameCycleDto implements Serializable{
 		this.hitfrequence = hitfrequence;
 	}
 
-	public double getRefundp() {
+	public int getRefundp() {
 		return refundp;
 	}
 
-	public void setRefundp(double refundp) {
+	public void setRefundp(int refundp) {
 		this.refundp = refundp;
 	}
 
@@ -166,7 +168,7 @@ public class GameCycleDto implements Serializable{
 		this.archive = c.getArchive();
 		this.arrangement = c.getArrangement();
 		this.curr_percent = c.getCurr_percent();
-		this.real_percent = c.getReal_percent();
+		//this.real_percent = c.getPayout()/c.getStake();
 		this.date_fin = c.getDate_fin().substring(0, 10);
 		this.hitfrequence = c.getHitfrequence();
 		this.jeu = c.getJeu().getValue();
@@ -181,6 +183,15 @@ public class GameCycleDto implements Serializable{
 		this.refundp = c.getRefundp();
 		this.stake = c.getStake();
 		this.tour = c.getTour();
+		
+		if (c.getStake() != 0) {
+			this.real_percent = (this.refundp + c.getPayout() + this.jkpt)/c.getStake();
+			//this.real_percent = Double.parseDouble(String.format("%.2f", this.real_percent));
+			this.real_percent = (double)((int)(this.real_percent*100))/100;
+		}
+		else {
+			this.real_percent = 0;
+		}
 		return this;
 	}
 	

@@ -13,7 +13,7 @@ public interface GameCycleService {
 	List<GameCycle> find(Partner partner) throws DAOException;
 	int update(GameCycle gmc) throws DAOException;
 	boolean delete(GameCycle gmc) throws DAOException;
-	int updateRfp(double rfp, Partner partner, Jeu jeu) throws DAOException;
+	int updateRfp(int rfp, Partner partner, Jeu jeu) throws DAOException;
 	int updatePos(int pos, Partner partner, Jeu jeu) throws DAOException;
 	GameCycle findByGame(Partner partner, Jeu jeu) throws DAOException;
 	int updateArchive(double percent, String date, int archive, Partner partner, Jeu jeu,long misef, double stake, double payout, double jkpt) throws DAOException;

@@ -103,14 +103,14 @@ public class MisekDAOImpl implements MisekDAO {
 	}
 
 	@Override
-	public Misek searchMisesK(Miset miset) throws DAOException {
-		Misek misk = null;
+	public List<Misek> searchMisesK(Miset miset) throws DAOException {
+		List<Misek> misk = new ArrayList<>();
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Misek> query = currentSession.createQuery(QueryHelper.SQL_F_MISEK_MISET, Misek.class);
 			query.setParameter("miset", miset);
 			  
-			misk = query.getSingleResult();
+			misk = query.getResultList();
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -311,24 +311,25 @@ public class MisekDAOImpl implements MisekDAO {
 	}
 
 	@Override
-	public double getMiseKCycle(Long misek, Long mise, Partner partner) throws DAOException {
-		double sum = 0;
-		
+	public List<Misek> getMiseKCycle(Long misek, Long mise, Partner partner) throws DAOException {
+		//double sum = 0;
+		List<Misek> misk = new ArrayList<Misek>();
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
-			Object o = currentSession.createQuery(QueryHelper.SQL_F_COMPTA_CYCLE)
-			.setParameter("idMiseK", misek)
+			Query<Misek> query =  currentSession.createQuery(QueryHelper.SQL_F_COMPTA_CYCLE,  Misek.class);
+			//Object o = currentSession.createQuery(QueryHelper.SQL_F_COMPTA_CYCLE)
+			query.setParameter("idMiseK", misek)
 			.setParameter("idMiseK1", mise)
-			.setParameter("partner", partner)
-			.getSingleResult();
+			.setParameter("partner", partner);
 			
-			if(o != null) sum = (double)o;
+			//if(o != null) sum = (double)o;
+			misk = query.getResultList();
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
 		
-		return sum;
+		return misk;
 	}
 
 	@Override
@@ -417,6 +418,25 @@ public class MisekDAOImpl implements MisekDAO {
 		}
 		
 		return 1;
+	}
+
+	@Override
+	public Misek searchMisesK(Miset miset, int drawnum) {
+		System.out.println("Drawnum: " + drawnum);
+		Misek misk = null;
+		try {
+			Session currentSession = sessionFactory.getCurrentSession();
+			Query<Misek> query = currentSession.createQuery(QueryHelper.SQL_F_MISEK_MISET_DRAW, Misek.class);
+			query.setParameter("miset", miset)
+				 .setParameter("drawnumk", drawnum);
+			  
+			misk = query.getSingleResult();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return misk;
 	}
 
 }

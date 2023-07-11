@@ -1,10 +1,13 @@
 package com.pyramid.dev.business;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,19 +96,18 @@ public class SuperGameManager {
 	
 		String barcode;
 		Miset miset;
-		double _montant_evt = 0;//le prix d'un evenement
+		//double _montant_evt = 0;//le prix d'un evenement
 		double gain_total = 0;
 		Misek mk;
 		
 		for(Map.Entry mapentry : map_wait.entrySet()) {
+			
 			miset = (Miset) mapentry.getKey();
 			barcode = miset.getBarcode();
-			//log.info("key: "+barcode+" | "+misek);
-			//}
-			if(barcode == null || barcode == ""){
-				//return;
-			}
-			else{
+			
+			//log.info("BARCODE: "+barcode);
+			if(!StringUtils.isBlank(barcode)){
+				
 				//log.info("BARCODE: "+barcode);
 				//	if(!isTesting){
 
@@ -117,61 +119,53 @@ public class SuperGameManager {
 					String typeJeu = miset.getTypeJeu().value();
 
 					/*--- Keno traitment ---*/
-					List<EffChoicek> ticket = new ArrayList<EffChoicek>();
+					List<EffChoicek> ticket = new ArrayList<>();
 					
-					/*--- Spin traitment ---*/
-					List<EffChoicep> ticketp = new ArrayList<EffChoicep>();
-					Misep mp = new Misep();
-
-					switch(typeJeu)
+					String jeu = typeJeu.substring(0, 1);
+					//log.info("jeu: "+jeu);
+					
+					switch(jeu)
+					
 					{
 					case "K": // traitement ticket keno
 						//mk = mskservice.searchMisesK(miset);
 						mk = (Misek) mapentry.getValue();
+						//log.info("mk MAX EVNTS: "+mk);
 						if(mk != null){
 							//on recupere les evenements du ticket
 							//ticket = effchoicekservice.searchTicketK(""+mk.getIdmisek());
 							ticket = effchoicekservice.searchTicketK(mk, mk.getDrawnumk());
+							//log.info("EFFH MAX EVNTS: "+ticket.size());
 							int xmulti = mk.getXmulti();
 							//Misek _mk = misekDao.searchMiseK(""+mk.getIdmisek());
 							//log.info("EFFH EVNTS: "+ticket.size());
 
-							if( ticket.size() > 0 ){
-
-
+							if(!ticket.isEmpty()){
 
 								// recuperation de tous les evenement du ticket
 
 //								List<String> resultMulti  = new ArrayList<String>();
 //								boolean multiple = false;
 //								int multi = 1;
-								double xtiplicateur = 1;
 								
-//								Misek_temp misektp = mtpservice.find(mk.getIdMiseK());
-//								if(misektp != null) {
-//									multi = misektp.getMulti();
-//								}
-//								multiple = multi > 1 ? true : false;
-
-
+								// multiplicateur par defaut
+								double xtiplicateur = Double.parseDouble(Utile.multiplicateur[3]);
+								double odd;
 								// Verification du ticket
-
-
-								for(int i=0;i<ticket.size();i++ ){
-									//   log.info("_RESULT-DETAILS: "+ticket.size());
-									//							    			   if(multiple){
-									double odd = checkTicketKMax(ticket.get(i));
-									//setDetailTicket("cote", ""+odd);
-
+								
+								for(EffChoicek t : ticket) {
+									
+									odd = checkTicketKMax(t);
+									
 									if(odd != 0 && odd != -1){
-										_montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
-										gain_total = gain_total + odd * Double.parseDouble(ticket.get(i).getMtchoix());
-										//						
+										//_montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
+										gain_total = gain_total + odd * Double.parseDouble(t.getMtchoix());
+									
 										if(xmulti != 0) {
-											gain_total = gain_total * xtiplicateur;
+											gain_total = gain_total * xtiplicateur; 
 										}
 										gain_total = (double)((int)(gain_total*100))/100;
-										// return true;
+										
 									}
 								}
 
@@ -213,113 +207,104 @@ public class SuperGameManager {
 		mapMin.put("sum40", 0.0);
 
 
-		String barcode;
+		String barcode,typeJeu;
 		Misek mk;
 		Miset miset;
-		double _montant_evt = 0;//le prix d'un evenement
+		List<EffChoicek> ticket = new ArrayList<>();
+		List<EffChoicep> ticketp = new ArrayList<>();
 		double gain_total = 0;
 		for(Map.Entry mapentry : map_wait.entrySet()) {
 			miset = (Miset) mapentry.getKey();
 			mk = (Misek) mapentry.getValue();
 			barcode = miset.getBarcode();
-			//log.info("key: "+barcode+" | "+misek);
+		//	log.info("key: "+barcode+" | "+mk.getDrawnumk());
 			//}
-			if(barcode == null || barcode == ""){
+			if(!StringUtils.isEmpty(barcode)){
 				//return;
-			}
-			else{
-				
 				//Miset miset = misetDao.searchTicketT(barcode);
 				if(miset != null){ //le ticket existe
 
 					//le ticket est en attente de traitement
-					String typeJeu = miset.getTypeJeu().getValue();
+					typeJeu = miset.getTypeJeu().getValue();
 
 					/*--- Keno traitment ---*/
-					List<EffChoicek> ticket = new ArrayList<EffChoicek>();
+					 ticket.clear();
 					//Misek mk = new Misek();
 
 					/*--- Spin traitment ---*/
-					List<EffChoicep> ticketp = new ArrayList<EffChoicep>();
+					ticketp.clear();
 					Misep mp = new Misep();
+					
+					//log.info("typeJeu: "+typeJeu);
 
 					switch(typeJeu)
 					{
-					case "K": // traitement ticket keno
-						//mk = mskservice.searchMisesK(miset);
-						if(mk != null){
-							//on recupere les evenements du ticket
-							//ticket = effchoicekservice.searchTicketK(""+mk.getIdmisek());
-							ticket = effchoicekservice.searchTicketK(mk, mk.getDrawnumk());
-							int xmulti = mk.getXmulti();
-							//Misek _mk = misekDao.searchMiseK(""+mk.getIdmisek());
-							//log.info("EFFH EVNTS: "+ticket.size());
-
-							if( ticket.size() > 0 ){
-								// recuperation de tous les evenement du ticket
-								List<String> resultMulti  = new ArrayList<String>();
-								boolean multiple = false;
-								int multi = 1;
-								double xtiplicateur = 1;
-								
-								Misek_temp misektp = mtpservice.find(mk.getIdMiseK());
-								if(misektp != null) {
-									multi = misektp.getMulti();
-								}
-								multiple = multi > 1 ? true : false;
-
-
-								// Verification du ticket
-								int bet;
-								double gain;
-								for(int i=0;i<ticket.size();i++ ){
-									bet = Integer.parseInt(ticket.get(i).getIdparil());
-									//   log.info("_RESULT-DETAILS: "+ticket.size());
-									//								    			   if(multiple){
-
-									double odd = checkTicketKMin(ticket.get(i));
-
-									//if(bet>11) {
-
-									//}
-
-									if(odd != 0 && odd != -1){
-										//												    		   _montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
-										//												    		   gain_total = gain_total + odd * Double.parseDouble(ticket.get(i).getMtchoix());
-										//												    		   gain_total = (double)((int)(gain_total*100))/100;
-										gain = odd * Double.parseDouble(ticket.get(i).getMtchoix());
-										gain = (double)((int)(gain*100))/100;
-										twoSideKnife(bet, gain);
+						case "Keno": // traitement ticket keno
+							//mk = mskservice.searchMisesK(miset);
+							if(mk != null){
+								//on recupere les evenements du ticket
+								//ticket = effchoicekservice.searchTicketK(""+mk.getIdmisek());
+								ticket = effchoicekservice.searchTicketK(mk, mk.getDrawnumk());
+								int xmulti = mk.getXmulti();
+								//Misek _mk = misekDao.searchMiseK(""+mk.getIdmisek());
+								//log.info("EFFH EVNTS: "+ticket.size());
+	
+								if(!ticket.isEmpty()){
+									
+									
+									// Verification du ticket
+									int bet;
+									double gain;
+									
+									for(int i=0;i<ticket.size();i++ ){
+										
+										bet = Integer.parseInt(ticket.get(i).getIdparil());
+										//   log.info("_RESULT-DETAILS: "+ticket.size());
+										//								    			   if(multiple){
+	
+										double odd = checkTicketKMin(ticket.get(i));
+	
+										//if(bet>11) {
+	
+										//}
+	
+										if(odd != 0 && odd != -1){
+											//												    		   _montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
+											//												    		   gain_total = gain_total + odd * Double.parseDouble(ticket.get(i).getMtchoix());
+											//												    		   gain_total = (double)((int)(gain_total*100))/100;
+											gain = odd * Double.parseDouble(ticket.get(i).getMtchoix());
+											gain = (double)((int)(gain*100))/100;
+											twoSideKnife(bet, gain);
+										}
+										//								    			   }
+										//								    			   else{
+										//								    				   
+										//								    				   double odd = checkTicketKMin(ticket.get(i));
+										//											    	  // setDetailTicket("cote", ""+odd);
+										//											    	   
+										//											    	   if(odd != 0 && odd != -1){
+										////											    		   
+										////											    		   _montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
+										////											    		   gain_total = gain_total + odd * Double.parseDouble(ticket.get(i).getMtchoix());
+										////											    		   gain_total = (double)((int)(gain_total*100))/100;
+										//											    		   gain = odd * Double.parseDouble(ticket.get(i).getMtchoix());
+										//											    		   gain = (double)((int)(gain*100))/100;
+										//											    		   twoSideKnife(bet, gain);
+										////											    		   
+										//														}
+										//													
+										//								    			   }
 									}
-									//								    			   }
-									//								    			   else{
-									//								    				   
-									//								    				   double odd = checkTicketKMin(ticket.get(i));
-									//											    	  // setDetailTicket("cote", ""+odd);
-									//											    	   
-									//											    	   if(odd != 0 && odd != -1){
-									////											    		   
-									////											    		   _montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
-									////											    		   gain_total = gain_total + odd * Double.parseDouble(ticket.get(i).getMtchoix());
-									////											    		   gain_total = (double)((int)(gain_total*100))/100;
-									//											    		   gain = odd * Double.parseDouble(ticket.get(i).getMtchoix());
-									//											    		   gain = (double)((int)(gain*100))/100;
-									//											    		   twoSideKnife(bet, gain);
-									////											    		   
-									//														}
-									//													
-									//								    			   }
+	
 								}
-
 							}
+							break;
+						default:
+							break;
+	
 						}
-						break;
-					default:
-						break;
-
-					}
-
-					//			}
+	
+						//			}
 				}
 
 				//	}
@@ -332,6 +317,7 @@ public class SuperGameManager {
 	private double twoSideKnifeSum() {
   		double sum = 0;
   		sum = sum + Math.min(mapMin.get("pair"), mapMin.get("ipair"));
+  	//	System.out.println("Two knifes sum: "+sum);
   		sum = sum + Math.min(mapMin.get("pair20"), mapMin.get("ipair20"));
   		sum = sum + Math.min(mapMin.get("sum5"), mapMin.get("isum5"));
   		sum = sum + Math.min(mapMin.get("sum20"), mapMin.get("isum20"));
@@ -401,15 +387,15 @@ public class SuperGameManager {
  	 }
 	
 	public double getRoundPayed(double percent, int roundSize, int n_cycle, double bonusrate) {
-		double sum = 0;
 		
-		sum = (Params.MISE_MIN * percent * (100 - bonusrate))/(100 * roundSize);
-		return sum;
+		//return (Params.MISE_MIN * percent * (100 - bonusrate))/(100 * roundSize);
+		return (Params.MISE_MIN * percent)/roundSize;
+	
 	}
 	
 	public double verifTicketSum(Map<Miset, Misek> map_wait, String coderace, String result, String multix) {
 
-		double _montant_evt = 0;//le prix d'un evenement
+		//double _montant_evt = 0;//le prix d'un evenement
 		double gain_total = 0;
 		double multiplicateur = Double.parseDouble(multix);
 		double gain;
@@ -452,18 +438,16 @@ public class SuperGameManager {
 						xmulti = mk.getXmulti();
 						//Misek _mk = misekDao.searchMiseK(""+mk.getIdmisek());
 						//						log.info("EFFH EVNTS: "+ticket.size());
-
-						if( ticket.size() > 0 ){
-							
-							for(int i=0;i<ticket.size();i++ ){
+	
+							for(EffChoicek tick : ticket){
 								 gain = 0;
-								_montant_evt = 0;
-								odd = verifKeno(ticket.get(i), result);
+								//_montant_evt = 0;
+								odd = verifKeno(tick, result);
 
 								if(odd != 0 && odd != -1){
 																		    		   
-									_montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
-									gain = gain + odd * Double.parseDouble(ticket.get(i).getMtchoix());
+									//_montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
+									gain = gain + odd * Double.parseDouble(tick.getMtchoix());
 									//											    		   
 									if(xmulti != 0) {
 										gain = gain * multiplicateur;
@@ -473,9 +457,9 @@ public class SuperGameManager {
 								}
 
 								gain_total = gain_total + gain;
-							}
-
 						}
+
+						
 					}
 					break;
 				default:
@@ -604,316 +588,158 @@ public class SuperGameManager {
 	
 	public double verifTicket(Map<Miset, Misek> map_wait, Partner coderace) {
 		
-			String barcode;
-			Misek misek;
-			Miset miset;
-			Misek mk;
-			Misep mp;
-			String typeJeu;
-			List<EffChoicek> ticket;
-			EffChoicek fticket;
-			List<EffChoicep> ticketp;
-			EffChoicek tick;
-			List<String> resultMulti;
-			List<Misek> listMisek = new ArrayList<Misek>();
-			double gain_total = 0;
-			double gainMax = 0;
+		String barcode;
+		Misek misek = null;
+		Miset miset;
+		Misek mk;
+		String typeJeu;
+		List<EffChoicek> ticket;
+		List<Misek> listMisek = new ArrayList<Misek>();
+		double gain_total = 0;
+		double gainMax = 0;
+		
+	   boolean multiple = false;
+	   int multi = 1;
+	   int num_draw, num_tirage_final = 0;
+	   int draw_numK; //numero de tirage en cours
+	   String single_result="";
+	   String result_multi;
+	   double xtiplicateur = 1;
+	   Keno k_keno = null;
+	   
+	   for(Map.Entry mapentry : map_wait.entrySet()) {
 			
-		   boolean multiple = false;
- 		   int multi = 1;
- 		   int num_draw, num_tirage_final = 0;
- 		   int draw_numK; //numero de tirage en cours
- 		   String str0="",str1="";
- 		   String single_result="";
- 		   String result_multi;
- 		   double xtiplicateur = 1;
- 		   Keno k_keno = null;
- 		   double bonusWinAmount = 0;
- 		   int bonusWinCode = -1;
- 		   boolean bonusDown = Boolean.FALSE;
- 		   int bonusTicketCode;
+		    miset = (Miset) mapentry.getKey();
+			mk = (Misek) mapentry.getValue();
+			barcode = miset.getBarcode();
 			
-			for(Map.Entry mapentry : map_wait.entrySet()) {
-				miset = (Miset) mapentry.getKey();
-				mk = (Misek) mapentry.getValue();
-				barcode = miset.getBarcode();
+			log.info("key: "+barcode+" | "+mk.toString());
+		//}
+		    if(!StringUtils.isBlank(barcode)){
+			
+				if(miset != null){ //le ticket existe
 				
-				log.info("key: "+barcode+" | "+mk.toString());
-			//}
-			if(barcode != null && !StringUtils.isBlank(barcode)){
-				
-					if(miset != null){ //le ticket existe
+					//le ticket est en attente de traitement
+					typeJeu =  miset.getTypeJeu().value();
 					
-							//le ticket est en attente de traitement
-							typeJeu =  miset.getTypeJeu().value();
+					/*--- Keno traitment ---*/
+					ticket = new ArrayList<EffChoicek>();
+					//mk = new Misek();
+					Keno _keno = kenoservice.find_Max_draw(coderace);
+					draw_numK = _keno.getDrawnumK();
+					
+					switch(typeJeu)
+					{
+						case "Keno": // traitement ticket keno
 							
-							/*--- Keno traitment ---*/
-							ticket = new ArrayList<EffChoicek>();
-							//mk = new Misek();
 							
-							/*--- Spin traitment ---*/
-							ticketp = new ArrayList<EffChoicep>();
-							mp = new Misep();
-							
-							switch(typeJeu)
-							{
-								case "Keno": // traitement ticket keno
-									misek = mskservice.searchMisesK(miset);
-									if(mk != null){
-										//on recupere les evenements du ticket
-										ticket = effchoicekservice.searchTicketK(mk);
-										int xmulti = mk.getXmulti();
-										bonusTicketCode = mk.getBonusCod();
-										
-										if( !ticket.isEmpty() ){
-											
-											boolean winner = true;
-										    boolean isEnd = true;
-										    int tested = 0;
-										    
-										    // recuperation de tous les evenement du ticket
-										  //     for(int i=0;i<ticket.size();i++){
-										    	   
-							    		   tick = new EffChoicek();
-							    		   resultMulti  = new ArrayList<String>();
-							    		   
-							    		   //recherche du numero de tirage en cours
-							    		  // Partner part = partnerDao.findById(Integer.parseInt(""+caissier.getPartner()));
-							    		   Keno _keno = kenoservice.find_Max_draw(coderace);
-							    		   
-							    		   draw_numK = _keno.getDrawnumK();
-//							    		   System.out.println("Max draw draw_numK: "+draw_numK);
-//							    		   if(_keno.getStarted() == 0){ //tirage non terminÃ©
-//							    			   
-//							    		   }
-//							    		   else if(_keno.getStarted() == 1){//tirage terminÃ©
-//							    			   
-//							    		   }
-							    		   
-//							    		   Misek_temp misektp = mtpservice.find(mk.getIdMiseK());
-//							    		  
-//							    		   if(misektp != null) {
-//							    			   multi = misektp.getMulti();
-//							    		   }
-							    		   multiple = !ticket.isEmpty()  ? true : false;
-							    		   multi = ticket.size();
-							    		   num_tirage_final = ticket.get(multi - 1).getDrawnum();
-							    		   
-							    		   if(multiple){
-							    			    
-							    			    num_draw = mskservice.getNumDraw(ticket.get(0).getMisek());	
-//												num_tirage_final = num_draw + multi - 1;
-//												num_tirage_final = ticket.get(multi - 1).getDrawnum();
-												//log.info("DRAWNUMK: "+draw_numK+" NUM8TIRAGE: "+num_tirage_final+" BOOL: "+isDrawEnd);
-												
-//										    	   if(draw_numK <= num_tirage_final){
-//													  
-//												      return;
-//												   }
-													// recuperation des evnts dans effchoicek
-													for(int i=0;i< multi;i++){
-														int num = i + num_draw;
-														k_keno = kenoservice.searchResultK(num,coderace);
-														if(k_keno != null){
-														xtiplicateur = Double.parseDouble(k_keno.getMultiplicateur());
-														  if(k_keno.getStarted() == 1 ){
-															result_multi = k_keno.getDrawnumbK();
-															resultMulti.add(result_multi);
-														  }
-														  else{
-															  result_multi = "";
-														      resultMulti.add(result_multi);
-														  }
-														}
-														else{
-															result_multi = "";
-															resultMulti.add(result_multi);
-														}
-													}
-											//	}
-											   
-							    		   }
-							    		   else{
-							    			   
-							    			   //on cherche le numero de tirage correspondant
-							    		//	   num_draw = mskservice.getNumDraw(ticket.get(0).getMisek());
-							    			   num_draw = mskservice.getNumDraw(mk);
-							    		//	   setDrawData("draw_num", ""+num_draw);
-							    			  
-							    			   //on cherche le resultat du tirage dans la table keno
-							    			   k_keno = kenoservice.searchResultK(num_draw, coderace);
-							    			//   log.info("SINGLE: "+num_draw+" || "+k_keno.getStarted());
-							    			   if(k_keno != null){
-							    				   xtiplicateur = Double.parseDouble(k_keno.getMultiplicateur());
-							    				   if(k_keno.getStarted() == 1){
-							    					  // log.info("SINGLE: "+num_draw+" || "+k_keno.getStarted());
-							    					   
-							    					   single_result = k_keno.getDrawnumbK();
-//							    					   bonusWinAmount = k_keno.getBonusKamount();
-//							    					   System.out.println("BonusAmount: "+bonusWinAmount);
-//							    					   if(bonusWinAmount != 0) {
-//								    					   bonusDown = true;
-//								    					   bonusWinCode = k_keno.getBonusKcod(); 
-//									    			   }
-							    					  // setDrawData("draw_result", result);
-							    				   }
-							    			   }
-							    			   
-							    		   }
-							    		   
-							    		   // Verification du ticket
-							    		   double _montant_evt = 0;//le prix d'un evenement
-							    		   gain_total = 0;
-							    		   fticket = new EffChoicek();
-							    		   for(EffChoicek f : ticket){
-							    			   if(f.getDrawnum() == draw_numK) {
-							    				   fticket = f;
-							    				   break;
-							    			   }
-							    		   }
-							    		   
-							    		   
-							    		   
-							    		   for(int i=0;i<ticket.size();i++ ){
-							    			   
-							    			 
-							    			//   log.info("_RESULT-DETAILS: "+ticket.size());
-							    			   if(multiple){
-							    				   String[] _str;
-												   String _str0 = "",_str1="";
-												   //String _result = "<html>";
-												   String _result = "";
-												   
-												   _str = resultMulti.get(i).split("-");
-												  
-//												   for(int _i=0;_i<_str.length;_i++){
-//													   if(_i<10){
-//														   _str0 = _str0+" "+_str[_i];
-//													   }
-//													   else if (_i>9 && _i<20){
-//														   _str1 = _str1+" "+_str[_i];
-//													   }
-//												   }
-//												   _result = _result + _str0 + _str1;
-											   	  
-												   
-											    //	   double odd = verifKeno(fticket, resultMulti.get(i));
-												       double odd = verifKeno(ticket.get(i), resultMulti.get(i));
-											    	   System.out.println("draw_numK: "+(draw_numK-1) + " : "+ticket.get(i).getDrawnum());
-											    	   if( ticket.get(i).getDrawnum() == draw_numK - 1 ) {
-											    		   
-											    		   if(odd != 0 && odd != -1){
-												    		   _montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
-												    		   gain_total = gain_total + odd * Double.parseDouble(ticket.get(i).getMtchoix());
-												    		   if(xmulti != 0) {
-												    			   gain_total = gain_total * xtiplicateur;
-												    		   }
-												    		   gain_total = (double)((int)(gain_total*100))/100;
-												    		   gainMax = gainMax + gain_total;
-												    		   misek.setSumWin(gain_total + misek.getSumWin());
-												    		   misek.setEtatMise(EtatMise.GAGNANT);
-															}
-											    		   
-											    	   }
-											    	   
-											    	    
-							    			   }
-							    			   else{
-							    				   
-							    				   double odd = verifKeno(ticket.get(i), single_result);
-										    	  // setDetailTicket("cote", ""+odd);
-										    	   
-										    	   if(odd != 0 && odd != -1){
-										    		   _montant_evt = _montant_evt + Double.parseDouble(ticket.get(i).getMtchoix());
-										    		   gain_total = gain_total + odd * Double.parseDouble(ticket.get(i).getMtchoix());
-										    		   if(xmulti != 0) {
-										    			   gain_total = gain_total * xtiplicateur;
-										    		   }
-										    		   gain_total = (double)((int)(gain_total*100))/100;
-										    		   gainMax = gainMax + gain_total;
-										    		   misek.setSumWin(gain_total);
-													}
-													
-							    			   }
-							    		   }
-							    		   
-							    		   // TODO: search ticket bonus
-							    		   
-//							    		   if(!multiple) {
-//							    			   if(bonusDown) {
-//									    	       //System.out.println("bonusWinCode: "+bonusWinCode+" , bonusTicketCode: "+bonusTicketCode);
-//									    		   if(bonusWinCode == bonusTicketCode) {
-//									    			   gain_total = gain_total + bonusWinAmount;
-//									    			   gain_total = (double)((int)(gain_total*100))/100;
-//									    			   misek.setSumWin(gain_total);
-//									    		   }
-//										       }
-//							    		   }
-//							    		   else {
-//							    			   System.out.println("bonusDown: "+bonusDown+" , mk.getDrawnumk(): "+mk.getDrawnumk()+" , (draw_numK - 1): "+(draw_numK - 1));
-//							    			   if((mk.getDrawnumk() == (draw_numK - 1)) && bonusDown) {
-//									    	       //System.out.println("bonusWinCode: "+bonusWinCode+" , bonusTicketCode: "+bonusTicketCode);
-//									    		   if(bonusWinCode == bonusTicketCode) {
-//									    			   gain_total = gain_total + bonusWinAmount;
-//									    			   gain_total = (double)((int)(gain_total*100))/100;
-//									    			   misek.setSumWin(gain_total);
-//									    		   }
-//							    			   }
-//							    		   }
-							    		   
-							    		   
-							    		   
-							    		   if (multiple) {
-							    			   System.out.println("draw_numK: "+draw_numK + " num_tirage_final: "+num_tirage_final+" misek.getSumWin(): "+misek.getSumWin());
-							    			  
-							    			   if(draw_numK > num_tirage_final) {
-							    				   if(misek.getSumWin() != 0){
-							    					   misek.setEtatMise(EtatMise.GAGNANT);
-							    				   }
-							    				   else {
-							    					   misek.setEtatMise(EtatMise.PERDANT);
-							    				   }
-							    			   }
-							    		   }
-							    		   else {
-							    			   if(gain_total == 0){
-								    			   misek.setEtatMise(EtatMise.PERDANT);
+							if(mk != null){
+								
+								int xmulti = mk.getXmulti();
+								//on recupere les evenements du ticket
+								ticket = effchoicekservice.searchTicketK(mk);
+								                           
+								if( !ticket.isEmpty() ){
+
+					    		//   multiple = !ticket.isEmpty()  ? true : false;
+					    		   multi = ticket.size();
+						    	   multiple = multi > 1 ? true : false; 
+					    		   num_tirage_final = ticket.get(multi - 1).getDrawnum();
+
+				    			    // recherche du numero de tirage correspondant
+				    			    //num_draw = mskservice.getNumDraw(ticket.get(0).getMisek());	
+				    			    
+					    		    gain_total = 0;
+				    			    double odd;
+					    			    
+				    			    for(int i=0;i< multi;i++){
+						    			
+				    			    	final int num = i + num_tirage_final;
+						    			
+						    			// recherche de la mise correspondante
+						    			misek = mskservice.searchMisesK(miset).stream().filter(t -> t.getDrawnumk() == num).findFirst().get();
+						    			if(misek == null) continue;
+						    			
+						    			k_keno = kenoservice.searchResultK(num, coderace);
+						    			
+						    			if(k_keno != null){
+						    				
+						    				//mise à jour du keno
+						    				misek.setKeno(k_keno);
+						    				
+						    				if(k_keno.getStarted() == 1){
+						    					
+						    					single_result = k_keno.getDrawnumbK();
+						    					xtiplicateur = Double.parseDouble(k_keno.getMultiplicateur());
+						    					
+						    					// verification du ticket
+												odd = verifKeno(ticket.get(i), single_result);
+									    		
+									    		if(odd != 0 && odd != -1){
+									    		   
+									    	//	   System.out.println("MULTIPLICATEUR MULTI: "+xmulti+" KENO MULTI: "+xtiplicateur+" GAIN: "+gain_total);
+									    		   // verifie si le multiplicateur a été activé sur le ticket
+									    		   if(xmulti != 0) {
+									    			   gain_total = gain_total + (xtiplicateur * odd * Double.parseDouble(ticket.get(i).getMtchoix()));
+									    		   }
+									    		   else {
+									    			   gain_total = gain_total + odd * Double.parseDouble(ticket.get(i).getMtchoix());
+									    		   }
+									    		   
+									    		   gain_total = (int)((int)(gain_total*100))/100;
+									    		   
+									    		   gainMax = gainMax + gain_total;
 									    		   misek.setSumWin(gain_total);
-								    		   }
-								    		   else{
-								    			   misek.setEtatMise(EtatMise.GAGNANT);
-									    		   misek.setSumWin(gain_total);
-								    		   }
-							    		   }
+									    		   
+												}
+						    				}
+						    			}
+						    			
+						    		 }
+
+					    		   if (multiple) {
+					    			   System.out.println("draw_numK: "+draw_numK + " num_tirage_final: "+num_tirage_final+" misek.getSumWin(): "+misek.getSumWin());
+					    			  
+					    			   if(draw_numK > num_tirage_final) {
+					    				   if(misek.getSumWin() != 0){
+					    					   misek.setEtatMise(EtatMise.GAGNANT);
+					    				   }
+					    				   else {
+					    					   misek.setEtatMise(EtatMise.PERDANT);
+					    				   }
+					    			   }
+					    		   }
+					    		   else {
+					    			   if(gain_total == 0){
+						    			   misek.setEtatMise(EtatMise.PERDANT);
 							    		   
-							    		   listMisek.add(misek);
-										}
-									}
-								   break;
-								default:
-									break;
-							       
+						    		   }
+						    		   else{
+						    			   misek.setEtatMise(EtatMise.GAGNANT);
+							    		  
+						    		   }
+					    		   }
+					    		   
+					    		   listMisek.add(misek);
+								}
 							}
+						   break;
+						default:
+							break;
+					       
 					}
-			}
-		  }
-			
-		  //mise à jour de letat des tickets en bd
-			
-			if (!listMisek.isEmpty()) {
-				mskservice.updateAll(listMisek);
-			}
-//			for(Map.Entry mapentry : map_wait.entrySet()) {
-//				miset = (Miset) mapentry.getKey();
-//				misek = (Misek) mapentry.getValue();
-//				barcode = miset.getBarcode();
-//			//	log.info("key: "+barcode+" | "+misek);
-//				
-//				mskservice.update(misek);
-//			}
-			
-			return gainMax;
+				}
 		}
+	  }
+		
+	  //mise à jour de letat des tickets en bd
+		
+		if (!listMisek.isEmpty()) {
+			mskservice.updateAll(listMisek);
+		}
+
+		return gainMax;
+	}
 	
 	public ArrayList<Integer> getHitFrequency(int hf, int n_cycle) {
 
@@ -1043,6 +869,12 @@ public class SuperGameManager {
  			case 27://derniere couleur orange
  					cote = Utile.numSpec[2];
  				break;
+ 			case 28:// 1er sup 40.5
+					cote = Utile.numSpec[2];
+				break;
+			case 29:// 2e inf 40
+					cote = Utile.numSpec[2];
+				break;
  			default:
  				break;
  			}
@@ -1111,6 +943,12 @@ public class SuperGameManager {
 				break;
 			case 27://derniere couleur orange
 					cote = Utile.numSpec[2];
+				break;
+			case 28:// 1er inf 40.5
+				cote = Utile.numSpec[2];
+				break;
+			case 29:// 1er sup 40
+				cote = Utile.numSpec[2];
 				break;
 			default:
 				break;
@@ -1423,25 +1261,26 @@ public class SuperGameManager {
 
     public long manageCagnotte(ControlDisplayKeno cds) {
     	
-    	log.info(cagnotservice + " __ " +cds);
-    	Cagnotte cagnot = cagnotservice.find(cds.getPartner());
+    	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    
+    	List <Cagnotte> listcagnot = cagnotservice.find(cds.getPartner());
+    	log.info("MAnager Cagnotte __ " +listcagnot);
     	
-    	if (cagnot == null ) return -1L;
-    	log.info(cagnot.getBarcode() + " __ " +cagnot.getBarcode()+"  JEU:  "+cagnot.getJeu());
+    	if (listcagnot == null || listcagnot.isEmpty() ) return -1L;
+    	log.info("Manager __ " +listcagnot.size());
+    	Optional<Cagnotte> optcagnot = listcagnot.stream().filter(cg -> cg.getBarcode() == 0L).findFirst();
     	
-//    	cds.setBarcodeCagnot("0"+);
-    	
-    	if (cagnot.getJeu() == null || StringUtils.isBlank(cagnot.getJeu())) {
-    		return -1L;
-    	}
-    	else if (cagnot.getBarcode() == 0L) {
-    		// recherche s'il ya eu des paris le tour
+    	if(optcagnot.isPresent()) {
+    		Cagnotte cagnot = optcagnot.get();
+    		
     		List<Misek> tail;
     		int num_tirage = cds.getDrawNumk();
     		Keno k = kenoservice.find_Max_draw_bis(cds.getPartner());
     		tail = mskservice.searchMiseKdraw(k ,num_tirage);
+    		log.info("Cagnotte tail __ " + tail.size());
     		
     		if(tail.size() < 2){ //on compte le nombre de ticket tirÃ©
+    			log.info("Cagnotte __ pas assez de pari");
     			return -1L;
     		}
     		
@@ -1449,6 +1288,8 @@ public class SuperGameManager {
     			return cagnot.getIdCagnotte();
     		}
     	}
+    	
+    	
 			
     	
 		return -1L;

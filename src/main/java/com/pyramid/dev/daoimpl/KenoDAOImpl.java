@@ -65,20 +65,33 @@ public class KenoDAOImpl implements KenoDAO {
 		return Response.ok(KenoDTO.getInstance().error("")).build();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Keno find_Max_draw(Partner partner) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Keno ken = null;
+		int drawnum = 0;
 		try {
-			Query<Keno> query = currentSession.createQuery(QueryHelper.SQL_F_MAX_DRAW, Keno.class);
-			query.setParameter("coderace", partner)
-			     .setParameter("coderace1", partner);
-			//ken = query.getSingleResult();
-			Optional<Keno> q = query.uniqueResultOptional();
-			if (q.isPresent()) {
-				ken = q.get();
-			}
 			
+			Query<Integer> query = currentSession.createQuery(QueryHelper.SQL_MAX_DRAW)
+			.setParameter("coderace", partner);
+			Optional<Integer> q = query.uniqueResultOptional();
+			if (q.isPresent()) {
+				Integer cycle = q.get();
+				drawnum = cycle.intValue();
+				
+				Query<Keno> quer = currentSession.createQuery(QueryHelper.SQL_MAX_KENO, Keno.class);
+				quer.setParameter("drawnum", drawnum)
+				     .setParameter("coderace", partner);
+				//ken = query.getSingleResult();
+				Optional<Keno> res = quer.uniqueResultOptional();
+				if (res.isPresent()) {
+					ken = res.get();
+				}
+			}
+			else {
+				return null;
+			}
 			
 		}
 		catch(Exception e) {

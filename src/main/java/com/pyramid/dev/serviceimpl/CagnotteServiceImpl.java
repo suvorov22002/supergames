@@ -1,5 +1,7 @@
 package com.pyramid.dev.serviceimpl;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,7 @@ public class CagnotteServiceImpl implements CagnotteService {
 	
 	
 	@Override
-	public Cagnotte find(Partner p) throws DAOException {
+	public List <Cagnotte> find(Partner p) throws DAOException {
 		return cagnotteDao.find(p);
 	}
 
@@ -40,6 +42,12 @@ public class CagnotteServiceImpl implements CagnotteService {
 	@Override
 	public boolean create(Cagnotte cagnotte) throws DAOException {
 		return cagnotteDao.create(cagnotte);
+	}
+
+
+	@Override
+	public List<Cagnotte> findAllPendingCagnotte(Partner p) {
+		return cagnotteDao.findAllPendingCagnotte(p);
 	}
 
 }

@@ -73,7 +73,7 @@ public class GameCycleDAOImpl implements GameCycleDAO {
 	}
 
 	@Override
-	public int updateRfp(double rfp, Partner partner, Jeu jeu) throws DAOException {
+	public int updateRfp(int rfp, Partner partner, Jeu jeu) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		return (int) currentSession.createQuery(QueryHelper.SQL_U_GAMECYCLE_RTP)
 		.setParameter("refundp",rfp)

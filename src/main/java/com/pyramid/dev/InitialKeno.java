@@ -126,8 +126,6 @@ public class InitialKeno {
 			String coderace = partner.getCoderace();
 			List<Keno> keno = kenoservice.findAllDraw(partner);
 			System.out.println("[INITIAL KENO - KENO COUNT]: "+keno.size());
-			Cagnotte cgt = cagnotservice.find(partner);
-			System.out.println("[INITIAL KENO - CAGNOT COUNT]: "+cgt);
 			
 			if(keno.isEmpty()) {
 				//On ajoute une entrée pour le partner dans la table Keno

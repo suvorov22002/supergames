@@ -19,7 +19,8 @@ public interface MisekService {
 	boolean delete(Misek misek) throws DAOException;
 	Long ifindId(Partner partner) throws DAOException; 
 	int findId() throws DAOException; 
-	Misek searchMisesK(Miset miset) throws DAOException;
+	List<Misek> searchMisesK(Miset miset) throws DAOException;
+	//Misek searchMisesK(Miset miset, int drawnum) throws DAOException;
 	Misek searchMiseK(Long misek) throws DAOException;
 	int getNumDraw(Misek misek) throws DAOException;
 	public double getMiseRK(Caissier caissier, String date, String date1) throws DAOException;
@@ -30,7 +31,7 @@ public interface MisekService {
 	List<Misek> searchMiseKdraw(Keno keno, int num) throws DAOException;
 	List<Misek> searchWaitingBet(Partner partner, int drawnum) throws DAOException;
 	List<Misek> searchWaitingKenoBet(Partner partner, int drawnum, EtatMise etat) throws DAOException;
-	double getMiseKCycle(Long misek, Long mise, Partner partner) throws DAOException;
+	List<Misek> getMiseKCycle(Long misek, Long mise, Partner partner) throws DAOException;
 	double getMiseKCycleWin(long misek, long mise,Partner partner) throws DAOException;
 	int findId(Miset miset) throws DAOException;
 	int updateMiseRK(Caissier caissier, String date, String date1) throws DAOException;

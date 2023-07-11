@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class MisekDto implements Serializable {
 	
 	private Long idmisek;
+	private Long numeroTicket;
 	private String idCaissier;
 	private String heurMise;
 	private String sumMise;
@@ -27,6 +28,14 @@ public class MisekDto implements Serializable {
 
 	public void setIdmisek(Long idmisek) {
 		this.idmisek = idmisek;
+	}
+	
+	public Long getNumeroTicket() {
+		return numeroTicket;
+	}
+
+	public void setNumeroTicket(Long numeroTicket) {
+		this.numeroTicket = numeroTicket;
 	}
 
 	public String getIdCaissier() {
