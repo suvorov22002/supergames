@@ -31,8 +31,8 @@ public class GroupeDAOImpl implements GroupeDAO {
 	@Override
 	public Groupe find(Groupe grpe) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
-		Query<Groupe> query = currentSession.createQuery("from Groupe where idGroupe=:idgroupe", Groupe.class);
-		query.setParameter("idgroupe", grpe.getIdGroupe());
+		Query<Groupe> query = currentSession.createQuery("from Groupe where nomgroupe=:nomgroupe", Groupe.class);
+		query.setParameter("nomgroupe", grpe.getNomgroupe());
 		Groupe groupe = query.getSingleResult();
 		return groupe;
 	}

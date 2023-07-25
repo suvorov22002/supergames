@@ -92,7 +92,7 @@ public class InitialKeno {
 		
 		if (partners.isEmpty()) {
 			Groupe grpe = new Groupe();
-			grpe.setIdGroupe(0L);
+//			grpe.setIdGroupe(0L);
 			grpe.setNomgroupe("ramatbet");
 			grpe.setState("ramatbet");
 			grpe.setZone("ramatbet");
@@ -105,21 +105,12 @@ public class InitialKeno {
 			p.setZone("yaounde");
 			p.setIdpartner(1L);
 			partnerservice.create(p);
+			
 		}
-//		RefreshK ref = new RefreshK();
-//		ref.start();
-//		long barcode;
-//		// load barcode pool
-//		do {
-//			barcode = searchBarcode(Jeu.K);
-//			Utile.barcodeKenoPool.add(barcode);
-//			//System.out.println("[INITIAL KENO - barcodePool]: "+barcode);
-//		}
-//		while (Utile.barcodeKenoPool.size() < 1000);
 		
-		
-		
+
 		for (Partner partner : partners) {
+			
 		  if(partner.getActif() == 1) {
 			//Verification des configurations de bases
 			//** Entrée dans la table Keno **
@@ -199,6 +190,7 @@ public class InitialKeno {
 			System.out.println("[INITIAL KENO - ALL CAISSIERS]: "+coderace+" Total = "+caissiers.size());
 
 			for(Caissier cais : caissiers) {
+				
 				Airtime air = airtimeservice.find(cais);
 				if(air == null) {
 					Airtime airtime = new Airtime();

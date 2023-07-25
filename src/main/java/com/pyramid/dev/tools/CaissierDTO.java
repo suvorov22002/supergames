@@ -61,6 +61,11 @@ public class CaissierDTO extends ResponseBase {
 	public void setCais(CaissierDto cais) {
 		this.cais = cais;
 	}
+
+	@Override
+	public String toString() {
+		return "CaissierDTO [cais=" + cais + "]";
+	}
 	
 	
 

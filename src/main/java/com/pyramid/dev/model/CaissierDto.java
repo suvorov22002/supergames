@@ -101,7 +101,9 @@ public class CaissierDto implements Serializable{
 		this.idCaissier = c.getIdCaissier();
 		this.nomc = c.getNomC();
 		this.loginc = c.getLoginc();
-		this.partner = c.getPartner().getCoderace();
+		if(c.getPartner() != null) {
+			this.partner = c.getPartner().getCoderace();
+		}
 		this.profil = c.getProfil().getId();
 		this.mdpc = c.getMdpc();
 		this.statut = "C";

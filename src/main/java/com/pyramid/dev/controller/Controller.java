@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.hibernate.stat.internal.AbstractCacheableDataStatistics;
+import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationContext;
@@ -143,7 +143,7 @@ public class Controller {
 		}
 		
 		Groupe grpe = new Groupe();
-		grpe.setIdGroupe(1L);
+		grpe.setNomgroupe("ramatbet");
 		grpe = grpeservice.find(grpe);
 		
 		Partner p = new Partner();
@@ -158,7 +158,7 @@ public class Controller {
 		if (!partnerservice.create(p)) {
 			 return Response.ok(PartnerDTO.getInstance().event(part).error("")).build();
 		}
-		
+	
 		Config conf = new Config();
 		conf.setCoderace(p);
 		configservice.create(conf);
@@ -188,14 +188,40 @@ public class Controller {
 		gm.setStake(0d);
 		gm.setDate_fin("16-01-2030,00:17");
 		gmcservice.create(gm);
-	
+		
+		// Creation du thread
+		activatePartner(p);
 		return Response.ok(PartnerDTO.getInstance().event(p).sucess("CREATE")).build();
 		
 	}
 	
 	@GetMapping("list-partners")
-	public List<Partner> allpartners() {
-		 return partnerservice.getAllPartners();
+	public Response allpartners() {
+		
+		JSONObject ob = new JSONObject(); 
+		try {
+			List<Partner> listparterns = partnerservice.getAllPartners();
+			List<PartnerDto> listparternaires = new ArrayList<>();
+			
+			PartnerDto pdto = new PartnerDto();
+			
+			for(Partner p : listparterns) {
+				
+				pdto = new PartnerDto();
+				pdto.setCoderace(p.getCoderace());
+				listparternaires.add(pdto);
+				
+			}
+			 if (!listparternaires.isEmpty()) {
+				 ob.put("partners", listparternaires);
+				 String eve = Utile.convertJsonToString(ob);
+				 return Response.ok(ResponseData.getInstance().event(eve).sucess("")).build();
+			 }
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		 return Response.ok(ResponseData.getInstance().error("")).build();
 	}
 	
 	@GetMapping("timekeno/{coderace}")
@@ -831,11 +857,13 @@ public class Controller {
 	
 	@PostMapping("save-user/{coderace}")
 	public Response saveUser(@RequestBody CaissierDto cais, @PathVariable("coderace") String coderace) {
+		 
 		 Response res;
 		 Partner p = partnerservice.findById(coderace);
 		
 		 Long profil = cais.getProfil();
 		 Profil prof = new Profil();
+		 
 		 if(profil == 1) {
 			prof.setId(1L);
 	        prof.setLiblProfil("ADMINISTRATEUR");
@@ -844,69 +872,144 @@ public class Controller {
 			prof.setId(2L);
 	        prof.setLiblProfil("CAISSIER");
 		 }
+		 
+		 ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
+		 passwordEncryptor.setAlgorithm( Params.ALGO_CHIFFREMENT );
+		 passwordEncryptor.setPlainDigest( false );
+		 String passChiffre = passwordEncryptor.encryptPassword(cais.getMdpc());
 	
 		Caissier c = new Caissier();
 		c.setLoginc(cais.getLoginc());
-		c.setMdpc(cais.getMdpc());
+		c.setMdpc(passChiffre);
 		c.setNomC(cais.getNomc());
 		c.setProfil(prof);
 		
 		if(p != null) {
-			c.setPartner(p);
-			res = caisservice.create(c);
 			
-			if (res != null) {
+			c.setPartner(p);
+			Caissier caisse = caisservice.findByLoginIdPartner(c.getLoginc(), p);
+			
+			if(caisse == null) {
 				
-				Airtime airtime = new Airtime();
-				airtime.setBalance(0);
-				airtime.setCaissier(c);
-				airtime.setCredit(0);
-				airtime.setDebit(0);
-				airtime.setLibelle("");
-				airtime.setDate(new Date());
-				airtservice.create(airtime);
+				res = caisservice.create(c);
 				
-				Mouvement mouv = new Mouvement();
-				mouv.setMvt(0);
-				mouv.setCaissier(c);
-				mvtservice.create(mouv);
-				
+				if (res != null) {
+					
+					Airtime airtime = new Airtime();
+					airtime.setBalance(0);
+					airtime.setCaissier(c);
+					airtime.setCredit(0);
+					airtime.setDebit(0);
+					airtime.setLibelle("");
+					airtime.setDate(new Date());
+					airtservice.create(airtime);
+					
+					Mouvement mouv = new Mouvement();
+					mouv.setMvt(0);
+					mouv.setCaissier(c);
+					mvtservice.create(mouv);
+					
+				}
+				else {
+					return Response.ok(CaissierDTO.getInstance().error("Pas de partenaire")).build();
+				}
 			}
 			else {
-				return Response.ok(CaissierDTO.getInstance().error("Pas de partenaire")).build();
+				System.out.println("Caissier deja existant.");
+				return Response.ok(CaissierDTO.getInstance().error("Caissier deja existant.")).build();
 			}
+			
+			CaissierDto caisdto = new CaissierDto();
+			caisdto.setLoginc(c.getLoginc());
+			return Response.ok(CaissierDTO.getInstance().event(caisdto).sucess("")).build();
+			
 		}
 		
 		return Response.ok(CaissierDTO.getInstance().error("Pas de partenaire")).build();
 		
+	}
+	
+	@GetMapping("save-user/{login}/{pass}")
+	public Response saveAdmin(@PathVariable("login") String login, @PathVariable("pass") String pass) {
+		
+		Response res;
+	
+		if(login.contains("admin")) {
+			return Response.ok(CaissierDTO.getInstance().error("ERREUR LOGIN INCORRECT")).build();
+		}
+		
+		ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
+		passwordEncryptor.setAlgorithm( Params.ALGO_CHIFFREMENT );
+		passwordEncryptor.setPlainDigest( false );
+		String passChiffre = passwordEncryptor.encryptPassword(pass);
+		
+		Profil prof = new Profil();
+		prof.setId(1L);
+        prof.setLiblProfil("ADMINISTRATEUR");
+		
+		Caissier c = new Caissier();
+		c.setLoginc(login + ".admin");
+		c.setMdpc(passChiffre);
+		c.setNomC(login);
+		c.setProfil(prof);
+		
+		res = caisservice.create(c);
+		
+		if (res == null) {
+			return Response.ok(CaissierDTO.getInstance().error("ERREUR DE CREATION")).build();
+		}
+		
+		CaissierDto caisdto = new CaissierDto();
+		caisdto.setLoginc(c.getLoginc());
+		
+		return Response.ok(CaissierDTO.getInstance().event(caisdto).sucess("")).build();
 		 
 	}
 	
-	@GetMapping("finduser/{partner}/{login}/{profil}")
-	public Response retrieveUser(@PathVariable("partner") String partner,@PathVariable("login") String login, @PathVariable("profil") Long profil) {
+	@GetMapping("finduser/{partner}/{login}/{pass}")
+	public Response retrieveUser(@PathVariable("partner") String partner,@PathVariable("login") String login, @PathVariable("pass") String pass) {
 		//log.info("controller-user: "+login);
+		Response resp;
 		Partner part = new Partner();
 		part.setCoderace(partner);
 		Partner p = partnerservice.find(part);
-		
-		Profil prof = new Profil();
-		if(profil == 1) {
-			prof.setId(1L);
-	        prof.setLiblProfil("ADMINISTRATEUR");
-		}
-		else if(profil == 2) {
-			prof.setId(2L);
-	        prof.setLiblProfil("CAISSIER");
-		}
+//		
+//		Profil prof = new Profil();
+//		if(profil == 1) {
+//			prof.setId(1L);
+//	        prof.setLiblProfil("ADMINISTRATEUR");
+//		}
+//		else if(profil == 2) {
+//			prof.setId(2L);
+//	        prof.setLiblProfil("CAISSIER");
+//		}
 	
 		Caissier c = new Caissier();
 		c.setLoginc(login);
-		if(p != null) c.setPartner(p);
-		c.setProfil(prof);
-	//	log.info("Login: "+c.getLoginC()+" Partner: "+c.getPartner().getIdPartner());
-		Response resp = caisservice.find(c);
-	//	log.info("Entity: "+resp.getEntity());
+		c.setMdpc(pass);
+		if(p != null) {
+			
+			c.setPartner(p);
+			resp = caisservice.find(c);
+			
+		}
+		else {
+			resp = Response.ok(CaissierDTO.getInstance().error("PARTNER NOT FOUND")).build();
+		}
+//		c.setProfil(prof);
+		
 		return resp;
+	}
+	
+	@GetMapping("finduser-admin/{login}/{pass}")
+	public Response retrieveAdmin(@PathVariable("login") String login, @PathVariable("pass") String pass) {
+		
+		Caissier c = new Caissier();
+		c.setLoginc(login);
+		c.setMdpc(pass);
+	
+		return caisservice.find(c);
+
 	}
 	
 	@PostMapping(value = "placeslip-keno/{partner}", produces = "application/json")
@@ -1177,25 +1280,6 @@ public class Controller {
 	
 	private void cycleAJour(ControlDisplayKeno cds) {
 		gmcservice.updatePos(cds.getPos(), cds.getPartner(), Jeu.K);
-//		double summise;
-//		double sumwin;
-//		double jkpt;
-//		double curr_percent;
-//		Partner partner;
-//		
-//		// Summise
-//		summise = cds.getMiseTotale();
-//		// Sumwin
-//		sumwin = cds.getGainTotal();
-//		// Jackpot
-//		jkpt = 0;
-//		// partner
-//		partner = cds.getPartner();
-//		// current percent
-//		curr_percent = 0;
-//		gmcservice.updateArchive(curr_percent, DateFormatUtils.format(new Date(), "dd-MM-yyyy,HH:mm"), 1, 
-//				partner, Jeu.K, misef, summise, sumwin, jkpt);
-		
 	}
 
 	@GetMapping("combinaison/{coderace}/{num}")
@@ -1975,19 +2059,7 @@ public class Controller {
 			 
 			 List<Keno> lm = kenoservice.getLastKBonus(p);
 			 List<KenoRes> lknr = new ArrayList<>(lm.size());
-//			 KenoRes kenr = new KenoRes();
-//			 for (Keno k : lm) {
-//				 kenr = new KenoRes();
-//				 kenr.setBonuscod(k.getBonusKcod());
-//				 kenr.setBonusKamount(k.getBonusKamount());
-//				 kenr.setHeureTirage(k.getHeureTirage().replace(':', 'h').replace(',', '-'));
-//				 kenr.setDrawnumbK(k.getDrawnumbK());
-//				 kenr.setDrawnumK(k.getDrawnumK());
-//				 kenr.setMultiplicateur(k.getMultiplicateur());
-//				 kenr.setStr_draw_combi(k.getDrawnumbK());
-//				 lknr.add(kenr);l
-//			 }
-			 
+
 			 lknr = lm.stream().map(kn -> computeKeno(kn)).collect(Collectors.toList());
 			 ob.put("bonus", lknr);
 			 String eve = Utile.convertJsonToString(ob);
@@ -2012,19 +2084,6 @@ public class Controller {
 			 List<Keno> lm = kenoservice.getLastKdraw(p);
 			 List<KenoRes> lknr = new ArrayList<>(lm.size());
 			 //KenoRes kenr = new KenoRes();
-			 
-//			 lm = lm.stream().filter(k -> k.getStarted() != 0).collect(Collectors.toList());
-//			 lm.forEach(k -> {
-//				 KenoRes kenr = new KenoRes();
-//				 kenr.setBonuscod(k.getBonusKcod());
-//				 kenr.setBonusKamount(k.getBonusKamount());
-//				 kenr.setHeureTirage(k.getHeureTirage().replace(':', 'h').replace(',', '-'));
-//				 kenr.setDrawnumbK(k.getDrawnumbK());
-//				 kenr.setDrawnumK(k.getDrawnumK());
-//				 kenr.setMultiplicateur(k.getMultiplicateur());
-//				 kenr.setStr_draw_combi(k.getDrawnumbK());
-//				 lknr.add(kenr);
-//			 });
 			 
 			 lknr = lm.stream().filter(k -> k.getStarted() != 0).map(kn -> computeKeno(kn)).collect(Collectors.toList());
 			
@@ -2054,19 +2113,6 @@ public class Controller {
 			 List<KenoRes> lknr = new ArrayList<>(lm.size());
 			 //KenoRes kenr = new KenoRes();
 			 
-//			 lm = lm.stream().filter(k -> k.getStarted() != 0).collect(Collectors.toList());
-//			 lm.forEach(k -> {
-//				 KenoRes kenr = new KenoRes();
-//				 kenr.setBonuscod(k.getBonusKcod());
-//				 kenr.setBonusKamount(k.getBonusKamount());
-//				 kenr.setHeureTirage(k.getHeureTirage().replace(':', 'h').replace(',', '-'));
-//				 kenr.setDrawnumbK(k.getDrawnumbK());
-//				 kenr.setDrawnumK(k.getDrawnumK());
-//				 kenr.setMultiplicateur(k.getMultiplicateur());
-//				 kenr.setStr_draw_combi(k.getDrawnumbK());
-//				 lknr.add(kenr);
-//			 });
-			 
 			 lknr = lm.stream().filter(k -> k.getStarted() != 0).map(kn -> computeKeno(kn)).collect(Collectors.toList());
 			
 			 ob.put("bonus", lknr);
@@ -2077,7 +2123,34 @@ public class Controller {
 			return Response.ok(ResponseData.getInstance().error(e.getMessage())).build();
 		 }
 		 
+	}
+	
+	@GetMapping("partner/{coderace}")
+	public Response checkPartner(@PathVariable("coderace") String coderace) {
+		JSONObject ob = new JSONObject(); 
 		
+		 try {
+			 Partner p = null;
+			 p = partnerservice.findById(coderace);
+			 if (p == null ) return Response.ok(ResponseData.getInstance().error("")).build();
+			
+			 return Response.ok(PartnerDTO.getInstance().event(p).sucess("EXISTS")).build();
+		 } catch (Exception e) {
+			e.printStackTrace();
+			return Response.ok(ResponseData.getInstance().error(e.getMessage())).build();
+		 }
+	}
+	
+	@GetMapping("superadmin")
+	public int superAdmin() {
+		
+		 log.info("search superadmin");
+		 JSONObject ob = new JSONObject(); 
+		 List<Caissier> list = new ArrayList<Caissier>();
+		 list = caisservice.findSuperAdmin();
+		 
+		 return list.size();
+		 
 	}
 	
 	private KenoRes computeKeno(Keno k) {
@@ -2099,6 +2172,33 @@ public class Controller {
 		ModelMapper mapper = new ModelMapper();
 		T objDto = mapper.map(obj, c);
 		return objDto;
+	}
+	
+	private void activatePartner(Partner partner) {
+		
+		String coderace = partner.getCoderace();
+		
+		ControlDisplayKeno cds = new ControlDisplayKeno(applicationContext);
+		cds.setPartner(partner);
+		cds.setCoderace(coderace);
+		cds.setCountDown(Boolean.FALSE);
+		int rang = Utile._checkExistingSameDisplayCoderace(coderace);
+		
+		if(rang == -1){
+			
+			Utile.display_draw.put(coderace, cds);
+			rang = Utile.display_draw.size();
+			cds.setRang(rang);
+			cds.setTimeKeno(Utile.timekeno);
+			
+			RefreshK ref = new RefreshK(cds,partner,applicationContext);
+			ref.start();
+			
+		}
+		else {
+			cds.setRang(rang);
+		}
+		
 	}
 
 }

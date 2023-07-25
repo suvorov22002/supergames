@@ -41,10 +41,12 @@ public class QueryHelper {
 	/* CaissierDAO queries*/
 	
 	public static final String SQL_F_LOGIN_PASS = "FROM Caissier WHERE loginc=:loginC and partner =: partner"; 
+	public static final String SQL_F_LOGIN = "FROM Caissier WHERE loginc=:loginC"; 
 	public static final String SQL_CAIS_F_ID = "From Caissier where idCaissier =:idCaissier ";
 	public static final String SQL_U_CAISSIER_STATE = "UPDATE Caissier Set statut=:statut WHERE loginc=:loginC ";  
 	public static final String SQL_F_LOGIN_PARTNER = "FROM Caissier WHERE partner IN ( From Partner where coderace =:coderace ) "; 
 	public static final String SQL_F_LOGIN_CODERACE = "From Caissier where loginc=:login and partner =:id ";
+	public static final String SQL_F_LOGIN_ADMIN = "FROM Caissier WHERE loginc LIKE '%ADMIN' "; 
 	
 	/* GameCycleDAO queries*/
 	public static final String SQL_F_GAMECYCLE = "From GameCycle Where partner =:partner Order By idcycle desc ";

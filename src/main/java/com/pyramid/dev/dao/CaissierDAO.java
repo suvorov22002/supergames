@@ -20,4 +20,5 @@ public interface CaissierDAO {
 	List<Caissier> findByPartner(Partner partner) throws DAOException;
 	Caissier findByLoginIdPartner(String login, Partner partner)
 			throws DAOException;
+	List<Caissier> findSuperAdmin() throws DAOException;
 }

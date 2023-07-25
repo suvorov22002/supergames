@@ -66,4 +66,9 @@ public class CaissierServiceImpl implements CaissierService {
 		return caissierdao.findByLoginIdPartner(login, partner);
 	}
 
+	@Override
+	public List<Caissier> findSuperAdmin() throws DAOException {
+		return caissierdao.findSuperAdmin();
+	}
+
 }
