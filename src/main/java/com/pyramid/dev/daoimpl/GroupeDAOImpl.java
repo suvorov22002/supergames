@@ -33,8 +33,8 @@ public class GroupeDAOImpl implements GroupeDAO {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Groupe> query = currentSession.createQuery("from Groupe where nomgroupe=:nomgroupe", Groupe.class);
 		query.setParameter("nomgroupe", grpe.getNomgroupe());
-		Groupe groupe = query.getSingleResult();
-		return groupe;
+		return query.getResultList().stream().findFirst().orElse(null);
+		
 	}
 
 	@Override

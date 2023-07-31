@@ -26,4 +26,6 @@ public interface PartnerService {
 	PartnerDto find2(Partner partner) throws DAOException;
 	int retrieveTimeKeno(ControlDisplayKeno cds);
 	String retrieveDrawCombi(ControlDisplayKeno cds);
+
+	public int activateCurrentPartner(String coderace, int actif);
 }

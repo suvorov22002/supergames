@@ -88,6 +88,7 @@ public class QueryHelper {
 	public static final String SQL_U_BONUSP_RESET_AMOUNT_PARTNER = "Update Partner SET bonuskamount =:bonuspamount WHERE coderace =:coderace ";
 	public static final String SQL_F_PARTNER_BY_ID = "From Partner WHERE coderace =:partner ";
 	public static final String SQL_U_COB_PARTNER = "UPDATE Partner SET COB =:cob WHERE coderace =:coderace ";
+	public static final String SQL_U_ACTIVE_PARTNER = "UPDATE Partner SET actif =:actif WHERE coderace =:coderace ";
 	public static final String SQL_F_PARTNER_BY_GROUP = "From Partner WHERE groupe =:groupe ";
 	public static final String SQL_F_PARTNER_CONF = "Select P.coderace as coderace, bnkmin, bnkmax, bnpmin, bnpmax, bndmin, "
 			+ "bndmax, bonuskamount, bonusbamount, bonusdamount, bonuspamount, bonusramount "

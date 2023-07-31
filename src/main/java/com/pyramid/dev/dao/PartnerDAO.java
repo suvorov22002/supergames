@@ -22,8 +22,12 @@ public interface PartnerDAO {
 	Partner findById(String id) throws DAOException;
 	List<Partner> getAllPartners() throws DAOException;
 	int update_cob(String cob,Partner partner) throws DAOException;
-	List<Partner> getAllPartnersByGroup(String idgrp) throws DAOException;
+
+	public int activateCurrentPartner(String coderace, int actif) throws DAOException;
+
+    List<Partner> getAllPartnersByGroup(String idgrp) throws DAOException;
 	PartnerDto find2(Partner partner) throws DAOException;
 	int retrieveTimeKeno(ControlDisplayKeno cds);
 	String retrieveDrawCombi(ControlDisplayKeno cds);
+
 }

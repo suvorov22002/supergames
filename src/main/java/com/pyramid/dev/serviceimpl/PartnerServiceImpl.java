@@ -114,4 +114,9 @@ public class PartnerServiceImpl implements PartnerService {
 		return partnerdao.retrieveDrawCombi(cds);
 	}
 
+	@Override
+	public int activateCurrentPartner(String coderace, int actif) {
+		return  partnerdao.activateCurrentPartner(coderace, actif);
+	}
+
 }

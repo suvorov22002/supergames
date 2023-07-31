@@ -178,6 +178,7 @@ public class RefreshK implements Runnable {
 				System.out.println("[REFRESH KENO MIS A JOUR]: "+_keno.getDrawnumK()+" multi: "+_keno.getMultiplicateur()+" coderace: "+_keno.getCoderace()+" id: "+_keno.getIdKeno());
 				
 			      _keno.setStarted(1);
+			      System.out.println("End Draw refreesh: " + _keno.getPartner().toString());
 				//  supermanager.endDraw(_keno);
 				  supermanager.endDraw(_keno.getDrawnumK(), _keno.getPartner());
 				  

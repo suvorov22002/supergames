@@ -2,13 +2,7 @@ package com.pyramid.dev.controller;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -201,17 +195,12 @@ public class Controller {
 		JSONObject ob = new JSONObject(); 
 		try {
 			List<Partner> listparterns = partnerservice.getAllPartners();
-			List<PartnerDto> listparternaires = new ArrayList<>();
-			
-			PartnerDto pdto = new PartnerDto();
-			
-			for(Partner p : listparterns) {
-				
-				pdto = new PartnerDto();
-				pdto.setCoderace(p.getCoderace());
-				listparternaires.add(pdto);
-				
-			}
+			List<PartnerDto> listparternaires;
+
+			listparternaires = listparterns.stream().filter(p -> !p.getCoderace().equals("ramatbet"))
+					.map(this::topartnerDto)
+					.collect(Collectors.toList());
+
 			 if (!listparternaires.isEmpty()) {
 				 ob.put("partners", listparternaires);
 				 String eve = Utile.convertJsonToString(ob);
@@ -222,6 +211,44 @@ public class Controller {
 			e.printStackTrace();
 		}
 		 return Response.ok(ResponseData.getInstance().error("")).build();
+	}
+
+	private PartnerDto topartnerDto(Partner partner) {
+
+		PartnerDto partnerDto = new PartnerDto();
+		partnerDto.setCoderace(partner.getCoderace());
+		partnerDto.setActif(partner.getActif());
+
+		return partnerDto;
+	}
+
+	@GetMapping("active-partners/{coderace}")
+	public Response activatePartners(String coderace) {
+
+		JSONObject ob = new JSONObject();
+		try {
+			List<Partner> listparterns = partnerservice.getAllPartners();
+			List<PartnerDto> listparternaires = new ArrayList<>();
+
+			PartnerDto pdto = new PartnerDto();
+
+			for(Partner p : listparterns) {
+
+				pdto = new PartnerDto();
+				pdto.setCoderace(p.getCoderace());
+				listparternaires.add(pdto);
+
+			}
+			if (!listparternaires.isEmpty()) {
+				ob.put("partners", listparternaires);
+				String eve = Utile.convertJsonToString(ob);
+				return Response.ok(ResponseData.getInstance().event(eve).sucess("")).build();
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		return Response.ok(ResponseData.getInstance().error("")).build();
 	}
 	
 	@GetMapping("timekeno/{coderace}")
@@ -968,7 +995,7 @@ public class Controller {
 	
 	@GetMapping("finduser/{partner}/{login}/{pass}")
 	public Response retrieveUser(@PathVariable("partner") String partner,@PathVariable("login") String login, @PathVariable("pass") String pass) {
-		//log.info("controller-user: "+login);
+		log.info("controller-user: "+partner + " login: " + login);
 		Response resp;
 		Partner part = new Partner();
 		part.setCoderace(partner);
@@ -987,6 +1014,7 @@ public class Controller {
 		Caissier c = new Caissier();
 		c.setLoginc(login);
 		c.setMdpc(pass);
+		
 		if(p != null) {
 			
 			c.setPartner(p);

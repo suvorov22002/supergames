@@ -3,8 +3,6 @@ package com.pyramid.dev.daoimpl;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -18,7 +16,6 @@ import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.Partner;
 import com.pyramid.dev.model.PartnerDto;
 import com.pyramid.dev.tools.ControlDisplayKeno;
-import com.pyramid.dev.tools.PartnerDTO;
 import com.pyramid.dev.tools.QueryHelper;
 import com.pyramid.dev.tools.Utile;
 
@@ -156,6 +153,15 @@ public class PartnerDAOImpl implements PartnerDAO {
 		.setParameter("cob", cob)
 		.setParameter("coderace", partner)
 		.getSingleResult();
+	}
+
+	@Override
+	public int activateCurrentPartner(String coderace, int actif) throws DAOException {
+		Session currentSession = sessionFactory.getCurrentSession();
+		return (int) currentSession.createQuery(QueryHelper.SQL_U_ACTIVE_PARTNER)
+				.setParameter("actif", actif)
+				.setParameter("coderace", coderace)
+				.getSingleResult();
 	}
 
 	@Override

@@ -493,6 +493,8 @@ public class SuperGameManager {
 	
 	public int endDraw(int draw_num, Partner partner){
 		int num = draw_num-10;
+		if(num < 0) num = 0;
+		System.out.println("End Draw: " + partner.toString());
 		return kenoservice.updateDrawEnd(num, partner);
 	}
 	
@@ -510,6 +512,7 @@ public class SuperGameManager {
 		
 //		timeBefore = System.currentTimeMillis();
 		Keno k = kenoservice.find_Max_draw_bis(partner);
+		if(k == null) return false;
 //		timeAfter = System.currentTimeMillis() - timeBefore;
 //		log.info("SEEK KENO TIME: "+timeAfter);
 		timeAfter = 0;
@@ -520,7 +523,6 @@ public class SuperGameManager {
 		timeAfter = System.currentTimeMillis() - timeBefore;
 //		log.info("SEEK TICKET TIME: "+timeAfter);
 		//Partner partner = partservice.find(getCoderace());
-		log.info("TAIL: "+tail.size()+" Tirage: "+num_tirage+" Keno: "+k.getDrawnumK());
 		if(tail.size() < 2){ //on compte le nombre de ticket tirÃ©
 			return false;
 		}

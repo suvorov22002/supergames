@@ -24,6 +24,8 @@ public class PartnerDto implements Serializable{
 	private double bnsdmax;
 	private double bnsbmin;
 	private double bnsbmax;
+
+	private int actif;
 	
 	public PartnerDto() {
 		super();
@@ -157,4 +159,11 @@ public class PartnerDto implements Serializable{
 		this.zone = zone;
 	}
 
+	public int getActif() {
+		return actif;
+	}
+
+	public void setActif(int actif) {
+		this.actif = actif;
+	}
 }
