@@ -21,7 +21,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 @Configuration
 @EnableTransactionManagement
 @EnableAutoConfiguration(exclude = { HibernateJpaAutoConfiguration.class})
-@ComponentScans(value = { @ComponentScan("boot.entry"),
+@ComponentScans(value = {
 		 
 	      @ComponentScan("com.pyramid.dev.exception"),
 	      @ComponentScan("com.pyramid.dev.enums"),
@@ -30,7 +30,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 	      @ComponentScan("com.pyramid.dev.daoimpl"),
 	      @ComponentScan("com.pyramid.dev.business"),
 	      @ComponentScan("com.pyramid.dev.model"),
-	      @ComponentScan("Miscallaneous"),
 	      @ComponentScan("com.pyramid.dev.tools"),
 	      @ComponentScan("com.pyramid.dev.service"),
 		  @ComponentScan("com.pyramid.dev.serviceimpl")})

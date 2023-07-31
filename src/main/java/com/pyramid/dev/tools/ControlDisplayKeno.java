@@ -9,14 +9,11 @@ import org.springframework.stereotype.Component;
 
 import com.pyramid.dev.business.RefreshK;
 import com.pyramid.dev.business.SuperGameManager;
-import com.pyramid.dev.enums.Jeu;
-import com.pyramid.dev.model.GameCycle;
 import com.pyramid.dev.model.Keno;
 import com.pyramid.dev.model.Misek;
 import com.pyramid.dev.model.Miset;
 import com.pyramid.dev.model.Partner;
 import com.pyramid.dev.model.TraceCycle;
-import com.pyramid.dev.service.GameCycleService;
 import com.pyramid.dev.service.KenoService;
 
 @Component
@@ -461,7 +458,7 @@ public class ControlDisplayKeno implements Runnable{
 //        			multiplix = Utile.multiplicateur[(int)n]; 
 //    	    	}
     	    	
-    			sumDistTotale = supermanager.verifTicketSum(mapTicket, coderace, str, multiplicateur);
+    			sumDistTotale = supermanager.verifTicketSum(mapTicket, str, multiplicateur);
     			_str = str;
     			setMultiplix(multiplicateur);
     			if(gmp != 0) { //two sides knife
@@ -506,7 +503,7 @@ public class ControlDisplayKeno implements Runnable{
 	    	    	}
 	    	    	
 	    			//System.out.println("sumDistTotale coderace "+str);
-	    			sumDistTotale = supermanager.verifTicketSum(mapTicket, coderace, str, multiplicateur);
+	    			sumDistTotale = supermanager.verifTicketSum(mapTicket, str, multiplicateur);
 	    			//System.out.println("sumDistTotale "+sumDistTotale + " result: " + str);
 	    		
 	    			if (gmp != 0) {

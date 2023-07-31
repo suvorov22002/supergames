@@ -1,30 +1,25 @@
 package com.pyramid.dev.daoimpl;
 
-import java.util.List;
-import java.util.Optional;
-
-import javax.ws.rs.core.Response;
-
+import com.pyramid.dev.dao.Misek_tempDAO;
+import com.pyramid.dev.exception.DAOException;
+import com.pyramid.dev.model.Misek_temp;
+import com.pyramid.dev.model.Partner;
+import com.pyramid.dev.tools.QueryHelper;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.pyramid.dev.dao.Misek_tempDAO;
-import com.pyramid.dev.exception.DAOException;
-import com.pyramid.dev.model.Keno;
-import com.pyramid.dev.model.Misek_temp;
-import com.pyramid.dev.model.Partner;
-import com.pyramid.dev.tools.KenoDTO;
-import com.pyramid.dev.tools.QueryHelper;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
-public class Misek_tempDAOImpl implements Misek_tempDAO {
-	
+public class MisekTempDAOImpl implements Misek_tempDAO {
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Override
 	public boolean create(Misek_temp misek) throws DAOException {
 		boolean status = false;
@@ -51,7 +46,7 @@ public class Misek_tempDAOImpl implements Misek_tempDAO {
 				return mtp;
 			}
 		}catch(Exception e) {
-			System.err.println("MSTP - PAS DE TICKET TEMPORAIRES");
+			e.printStackTrace();
 		}
 		return mtp;
 	}
@@ -60,9 +55,9 @@ public class Misek_tempDAOImpl implements Misek_tempDAO {
 	public int update(Long misek) throws DAOException {
 		// TODO Auto-generated method stub
 		Session currentSession = sessionFactory.getCurrentSession();
-		return (int) currentSession.createQuery(QueryHelper.SQL_U_MISEK_ID)
-		.setParameter("idmisek", misek).executeUpdate();
-		
+		return currentSession.createQuery(QueryHelper.SQL_U_MISEK_ID)
+				.setParameter("idmisek", misek).executeUpdate();
+
 	}
 
 	@Override
@@ -81,9 +76,8 @@ public class Misek_tempDAOImpl implements Misek_tempDAO {
 	public List<Misek_temp> searchWaitingBet() throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Misek_temp> query = currentSession.createQuery(QueryHelper.SQL_F_M_MISEK_ID, Misek_temp.class);
-		  
-		List<Misek_temp> mtp = query.getResultList();
-		return mtp;
+
+		return query.getResultList();
 	}
 
 	@Override
@@ -91,9 +85,8 @@ public class Misek_tempDAOImpl implements Misek_tempDAO {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Misek_temp> query = currentSession.createQuery(QueryHelper.SQL_F_TMP, Misek_temp.class);
 		query.setParameter("partner", p);
-		
-		List<Misek_temp> mtp = query.getResultList();
-		return mtp;
+
+		return query.getResultList();
 	}
 
 }

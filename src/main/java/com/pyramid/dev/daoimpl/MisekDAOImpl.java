@@ -206,7 +206,7 @@ public class MisekDAOImpl implements MisekDAO {
 	public List<AdminTicketDto> getMisekt(String date, String date1, Partner partner) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query query = currentSession.createQuery(QueryHelper.SQL_F_STAT_MISEK_MISET);
-		query.setParameter("coderace", partner)
+		query.setParameter("coderace", partner.getCoderace())
 			 .setParameter("heur1", date)
 		     .setParameter("heur2", date1);
 		

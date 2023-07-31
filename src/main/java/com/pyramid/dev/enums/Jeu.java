@@ -13,14 +13,14 @@ public enum Jeu {
 	K("Keno");
 	
 	private String value;
-	private static List<Jeu> style_jeu = new ArrayList<Jeu>();
+	private static List<Jeu> styleJeu = new ArrayList<>();
 	static {
-		style_jeu.add(M);
-		style_jeu.add(D);
-		style_jeu.add(L);
-		style_jeu.add(B);
-		style_jeu.add(S);
-		style_jeu.add(K);
+		styleJeu.add(M);
+		styleJeu.add(D);
+		styleJeu.add(L);
+		styleJeu.add(B);
+		styleJeu.add(S);
+		styleJeu.add(K);
 	}
 	
 	private Jeu(String value) {
@@ -40,6 +40,6 @@ public enum Jeu {
 	}
 	
 	public static List<Jeu> styleJeu(){
-		return style_jeu;
+		return styleJeu;
 	}
 }

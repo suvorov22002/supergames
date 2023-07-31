@@ -1,13 +1,10 @@
 package com.pyramid.dev.responsecode;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-//import javax.inject.Singleton;
-
-
-import org.springframework.stereotype.Component;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 //@Singleton
@@ -26,18 +23,17 @@ public class ResponseHolder {
 	public static String TCKALRPAID = "033";
 	public static String TCKNEVAL = "034";
 	public static String TCKNREG = "035";
-	
-	
+
+
 	public static Map<String, String> mapMessage = new HashMap<String, String>();
-	
+
 	public ResponseHolder(){
-		
+		// TODO document why this constructor is empty
 	}
 
 	@PostConstruct
 	public void PostConstruct(){
-		
-		mapMessage.put("404","NOT_FOUND");
+
 		mapMessage.put("404","NOT_FOUND");
 		mapMessage.put("503","SERVICE_UNAVAILABLE");
 		mapMessage.put("502","Bad Gateway");
@@ -72,13 +68,13 @@ public class ResponseHolder {
 //		mapMessage.put("023","ACCOUNT CLOSE");
 //		mapMessage.put("024","BLOCKING CUSTOMER");
 //		mapMessage.put("025","BLOCKING ACCOUNT");
-		
+
 		mapMessage.put("030","TICKET CHOIX ERROR");
 		mapMessage.put("031","TICKET INCONNU");
 		mapMessage.put("032","TICKET NON RECONNU");
 		mapMessage.put("033","TICKET ALREADY PAID");
 		mapMessage.put("034","TICKET NON EVALUE");
 		mapMessage.put("035","TICKET NON ENREGISTRE");
-		
+
 	}
 }

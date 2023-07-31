@@ -1,5 +1,9 @@
 package com.pyramid.dev.tools;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class QueryHelper {
 	
 	/* KenoDAO queries */
@@ -116,7 +120,7 @@ public class QueryHelper {
 			+ "order by heureMise desc";
 	public static final String SQL_F_STAT_MISEK_MISET = "SELECT k.dateMise as datMise, t.barcode as barcode, t.typeJeu as typeJeu, t.summise as summise,k.sumWin as sumwin, k.etatMise as etatMise "
 			+ "FROM Miset t, Misek k, Keno e WHERE heureMise BETWEEN :heur1 AND :heur2 "
-			+ "AND e.partner =:coderace "
+			+ "AND e.coderace =:coderace "
 			+ "AND t.idMiseT = k.miset "
 			+ "AND e.idKeno = k.keno "
 			+ "order by heureMise desc";

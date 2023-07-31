@@ -1,12 +1,12 @@
 package com.pyramid.dev.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pyramid.dev.enums.EtatMise;
 import com.pyramid.dev.enums.Jeu;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BetTicketK implements Serializable {
 

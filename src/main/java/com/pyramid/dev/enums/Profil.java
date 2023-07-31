@@ -9,12 +9,12 @@ public enum Profil {
 	CAISSIER("Caissier");
 	
 	private String value;
-	private static List<Profil> profil = new ArrayList<>();
+	private static List<Profil> profils = new ArrayList<>();
 	
 	static {
 		
-		profil.add(ADMINISTRATEUR);
-		profil.add(CAISSIER);
+		profils.add(ADMINISTRATEUR);
+		profils.add(CAISSIER);
 		
 	}
 	
@@ -35,6 +35,6 @@ public enum Profil {
 	}
 	
 	public static List<Profil> listeProfil(){
-		return profil;
+		return profils;
 	}
 }

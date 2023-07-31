@@ -1,26 +1,24 @@
 package com.pyramid.dev.daoimpl;
 
-import java.util.Optional;
-
+import com.pyramid.dev.dao.ConfigDAO;
+import com.pyramid.dev.exception.DAOException;
+import com.pyramid.dev.model.Config;
+import com.pyramid.dev.model.Partner;
+import com.pyramid.dev.tools.QueryHelper;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.pyramid.dev.dao.ConfigDAO;
-import com.pyramid.dev.exception.DAOException;
-import com.pyramid.dev.model.Cagnotte;
-import com.pyramid.dev.model.Config;
-import com.pyramid.dev.model.Partner;
-import com.pyramid.dev.tools.QueryHelper;
+import java.util.Optional;
 
 @Repository
 public class ConfigDAOImpl implements  ConfigDAO {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Override
 	public boolean create(Config config) throws DAOException {
 		boolean status = false;
@@ -46,7 +44,7 @@ public class ConfigDAOImpl implements  ConfigDAO {
 				cfg = q.get();
 			}
 		}catch(Exception e) {
-			System.err.print("[CONFIG DAO IMP] "+e);
+			e.printStackTrace();
 		}
 		return cfg;
 	}
@@ -78,23 +76,23 @@ public class ConfigDAOImpl implements  ConfigDAO {
 	@Override
 	public int updateBonusK(double bonusrate, double bnkmin, double bnkmax, Partner partner) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
-		return (int) currentSession.createQuery(QueryHelper.SQL_U_CONFIG_BONUSK)
-		.setParameter("bonusrate", bonusrate)
-		.setParameter("bnkmin", bnkmin)
-		.setParameter("bnkmax", bnkmax)
-		.setParameter("coderace", partner)
-		.executeUpdate();
+		return currentSession.createQuery(QueryHelper.SQL_U_CONFIG_BONUSK)
+				.setParameter("bonusrate", bonusrate)
+				.setParameter("bnkmin", bnkmin)
+				.setParameter("bnkmax", bnkmax)
+				.setParameter("coderace", partner)
+				.executeUpdate();
 	}
 
 	@Override
 	public int updateBonusP(double bonusrate, double bnpmin, double bnpmax, Partner partner) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
-		return (int) currentSession.createQuery(QueryHelper.SQL_U_CONFIG_BONUSP)
-		.setParameter("bonusrate", bonusrate)
-		.setParameter("bnpmax", bnpmax)
-		.setParameter("bnpmin", bnpmin)
-		.setParameter("coderace", partner)
-		.executeUpdate();
+		return currentSession.createQuery(QueryHelper.SQL_U_CONFIG_BONUSP)
+				.setParameter("bonusrate", bonusrate)
+				.setParameter("bnpmax", bnpmax)
+				.setParameter("bnpmin", bnpmin)
+				.setParameter("coderace", partner)
+				.executeUpdate();
 	}
 
 }

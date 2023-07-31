@@ -2,10 +2,8 @@ package com.pyramid.dev.model;
 
 import java.io.Serializable;
 
-import com.pyramid.dev.tools.Utile;
-
 public class GameCycleDto implements Serializable{
-	
+
 	private double percent;
 	private int tour;
 	private int hitfrequence;
@@ -23,9 +21,9 @@ public class GameCycleDto implements Serializable{
 	private double payout;
 	private double jkpt;
 	private double real_percent;
-	
+
 	public GameCycleDto() {
-		
+		// TODO document why this constructor is empty
 	}
 
 	public double getPercent() {
@@ -183,16 +181,15 @@ public class GameCycleDto implements Serializable{
 		this.refundp = c.getRefundp();
 		this.stake = c.getStake();
 		this.tour = c.getTour();
-		
+
 		if (c.getStake() != 0) {
 			this.real_percent = (this.refundp + c.getPayout() + this.jkpt)/c.getStake();
 			//this.real_percent = Double.parseDouble(String.format("%.2f", this.real_percent));
 			this.real_percent = (double)((int)(this.real_percent*100))/100;
-		}
-		else {
+		} else {
 			this.real_percent = 0;
 		}
 		return this;
 	}
-	
+
 }

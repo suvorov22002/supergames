@@ -21,17 +21,17 @@ import com.pyramid.dev.tools.QueryHelper;
 
 @Repository
 public class VersementDAOImpl implements VersementDAO {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Autowired
 	CaissierService caisservice;
-	
+
 	@Override
 	public boolean create(Versement versement) throws DAOException {
 		boolean status = false;
-		Miset mt = null;
+
 		try {
 			sessionFactory.getCurrentSession().save(versement);
 			status = true;
@@ -51,17 +51,16 @@ public class VersementDAOImpl implements VersementDAO {
 	@Override
 	public Versement findById(Versement versement) throws DAOException {
 		Versement vers = null;
-		
+
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
-			Query<Versement> query = currentSession.createQuery("from Versement where idvers:=idvers", Versement.class);
+			Query<Versement> query = currentSession.createQuery("from Versement where idvers =:idvers", Versement.class);
 			query.setParameter("idvers", versement.getIdvers());
 			vers = query.getSingleResult();
+		} catch(Exception e) {
+			System.err.println("VERSEMENT-ERROR: "+e.getMessage());
 		}
-		catch(Exception e) {
-			System.err.println("VERSEMENT-ERROR: "+e);
-		}
-		
+
 		return vers;
 	}
 
@@ -102,8 +101,7 @@ public class VersementDAOImpl implements VersementDAO {
 			if (q.isPresent()) {
 				vers = q.get();
 			}
-		}
-		catch(Exception e) {
+		} catch(Exception e) {
 			System.err.println("MISET-ERROR: "+e);
 		}
 		return vers;
@@ -113,48 +111,48 @@ public class VersementDAOImpl implements VersementDAO {
 	public double getVersementD(String date, Caissier caissier, String date1, String jeu) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		double vers = 0;
-		 Object obj = currentSession.createQuery(QueryHelper.SQL_F_COMPTA_V)
-		.setParameter("debut", date)
-		.setParameter("fin", date1)
-		.setParameter("jeu", jeu)
-		.setParameter("caissier", caissier)
-		.getSingleResult();
-		 
-		 if(obj != null) vers = (double) obj;
-		 return vers;
+		Object obj = currentSession.createQuery(QueryHelper.SQL_F_COMPTA_V)
+				.setParameter("debut", date)
+				.setParameter("fin", date1)
+				.setParameter("jeu", jeu)
+				.setParameter("caissier", caissier)
+				.getSingleResult();
+
+		if(obj != null) vers = (double) obj;
+		return vers;
 	}
-	
+
 	@Override
 	public double getVersements(Caissier caissier, Long date1, Long date2) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		double vers = 0;
-		 Object obj = currentSession.createQuery(QueryHelper.SQL_F_COMPTA_VERS)
-		.setParameter("debut", String.valueOf(date1))
-		.setParameter("fin", String.valueOf(date2))
-		.setParameter("caissier", caissier)
-		.getSingleResult();
-		 
-		 if(obj != null) vers = (double) obj;
-		 return vers;
+		Object obj = currentSession.createQuery(QueryHelper.SQL_F_COMPTA_VERS)
+				.setParameter("debut", String.valueOf(date1))
+				.setParameter("fin", String.valueOf(date2))
+				.setParameter("caissier", caissier)
+				.getSingleResult();
+
+		if(obj != null) vers = (double) obj;
+		return vers;
 	}
 
 	@Override
 	public int getPayTicket(Caissier caissier, String date, String date1, String jeu) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Long n = (Long) currentSession.createQuery(QueryHelper.SQL_F_COUNT_VERS)
-		.setParameter("debut", date)
-		.setParameter("fin", date1)
-		.setParameter("jeu", jeu)
-		.setParameter("caissier", caissier)
-		.getSingleResult();
-		
+				.setParameter("debut", date)
+				.setParameter("fin", date1)
+				.setParameter("jeu", jeu)
+				.setParameter("caissier", caissier)
+				.getSingleResult();
+
 		return n.intValue();
 	}
 
 	@Override
 	public ArrayList<Versement> getVersementk(String min, String max, String jeu) throws DAOException {
 		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -170,14 +168,14 @@ public class VersementDAOImpl implements VersementDAO {
 		List<Versement> lvers = new ArrayList<>();
 		List<Caissier> lcais = caisservice.findByPartner(partner);
 		for (Caissier cais : lcais) {
-			 query.setParameter("heur1", date)
-		     .setParameter("heur2", date1)
-		     .setParameter("caissier", cais);
-			 
-			 List<Versement> vers = query.getResultList();
-			 if (vers != null && !vers.isEmpty()) {
-				 lvers.addAll(vers);
-			 }
+			query.setParameter("heur1", date)
+					.setParameter("heur2", date1)
+					.setParameter("caissier", cais);
+
+			List<Versement> vers = query.getResultList();
+			if (vers != null && !vers.isEmpty()) {
+				lvers.addAll(vers);
+			}
 		}
 		return lvers;
 	}

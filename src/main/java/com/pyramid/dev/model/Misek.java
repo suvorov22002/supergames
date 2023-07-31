@@ -1,22 +1,9 @@
 package com.pyramid.dev.model;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.pyramid.dev.enums.EtatMise;
+
+import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "misek")
@@ -191,7 +178,7 @@ public class Misek implements Serializable{
 
 	@Override
 	public int hashCode() {
-		int hash = 7;
+		int hash;
 //		hash = 31 * hash + bonusCod;
 //		hash = 31 * hash + idMiseK.hashCode();
 		hash = 31 + idMiseK.hashCode();

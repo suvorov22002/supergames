@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +17,10 @@ import com.pyramid.dev.service.AirtimeService;
 
 @Transactional
 @Service
+@AllArgsConstructor
 public class AirtimeServiceImpl implements AirtimeService {
-	
-	@Autowired
-	AirtimeDAO airtimedao;
+
+	private final AirtimeDAO airtimedao;
 	
 	@Override
 	public boolean create(Airtime airtime) throws DAOException {

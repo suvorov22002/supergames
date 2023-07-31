@@ -1,10 +1,13 @@
 package com.pyramid.dev.daoimpl;
 
-import java.util.List;
-import java.util.Optional;
-
-import javax.ws.rs.core.Response;
-
+import com.pyramid.dev.dao.CaissierDAO;
+import com.pyramid.dev.exception.DAOException;
+import com.pyramid.dev.model.Caissier;
+import com.pyramid.dev.model.CaissierDto;
+import com.pyramid.dev.model.Partner;
+import com.pyramid.dev.tools.CaissierDTO;
+import com.pyramid.dev.tools.Params;
+import com.pyramid.dev.tools.QueryHelper;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -12,62 +15,55 @@ import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.pyramid.dev.dao.CaissierDAO;
-import com.pyramid.dev.exception.DAOException;
-import com.pyramid.dev.model.Cagnotte;
-import com.pyramid.dev.model.Caissier;
-import com.pyramid.dev.model.CaissierDto;
-import com.pyramid.dev.model.Partner;
-import com.pyramid.dev.tools.CaissierDTO;
-import com.pyramid.dev.tools.Params;
-import com.pyramid.dev.tools.QueryHelper;
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class CaissierDAOImpl implements CaissierDAO {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Override
 	public Response create(Caissier caissier) throws DAOException {
 		//System.out.println(caissier);
 		CaissierDto caisdto = new CaissierDto();
 		try {
-			   sessionFactory.getCurrentSession().save(caissier);
-			   caisdto.transToCaissier(caissier);
+			sessionFactory.getCurrentSession().save(caissier);
+			caisdto.transToCaissier(caissier);
 		}catch(DAOException e) {
 			return null;
 		}
-		
+
 		return Response.ok(CaissierDTO.getInstance().event(caisdto).sucess("")).build();
 	}
 
 	@Override
 	public Response find(Caissier caissier) throws DAOException {
-		
+
 		Caissier cais = null;
 		CaissierDto caisdto = new CaissierDto();
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Caissier> query;
-			
+
 			if(caissier.getPartner() == null) {
 				query = currentSession.createQuery(QueryHelper.SQL_F_LOGIN, Caissier.class);
 				query.setParameter("loginC", caissier.getLoginc());
-					
-			}
-			else {
+
+			} else {
 				query = currentSession.createQuery(QueryHelper.SQL_F_LOGIN_PASS, Caissier.class);
 				query.setParameter("loginC", caissier.getLoginc())
-					 .setParameter("partner", caissier.getPartner());
+						.setParameter("partner", caissier.getPartner());
 			}
-			
-			
+
+
 			Optional<Caissier> q = query.uniqueResultOptional();
 			if (q.isPresent()) {
 				cais = q.get();
 				caisdto.transToCaissier(cais);
-				
+
 				ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
 				passwordEncryptor.setAlgorithm( Params.ALGO_CHIFFREMENT );
 				passwordEncryptor.setPlainDigest( false );
@@ -78,8 +74,7 @@ public class CaissierDAOImpl implements CaissierDAO {
 				if(!trouver) {
 					return Response.ok(CaissierDTO.getInstance().error("USER NOT FOUND")).build();
 				}
-			}
-			else {
+			} else {
 				return Response.ok(CaissierDTO.getInstance().error("USER NOT FOUND")).build();
 			}
 		}catch(Exception e) {
@@ -89,7 +84,7 @@ public class CaissierDAOImpl implements CaissierDAO {
 		caisdto.setMdpc("");
 		return Response.ok(CaissierDTO.getInstance().event(caisdto).sucess("")).build();
 	}
-	
+
 	@Override
 	public boolean update(Caissier caissier) throws DAOException {
 		boolean status = false;
@@ -114,12 +109,11 @@ public class CaissierDAOImpl implements CaissierDAO {
 			if (q.isPresent()) {
 				cais = q.get();
 			}
-		}
-		catch(Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 			//return Response.ok(CaissierDTO.getInstance().error(e.getMessage())).build();
 		}
-		
+
 		return cais;
 	}
 
@@ -139,9 +133,9 @@ public class CaissierDAOImpl implements CaissierDAO {
 	public int updateState(Caissier caissier) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		return (int) currentSession.createQuery(QueryHelper.SQL_U_CAISSIER_STATE)
-		.setParameter("statut", caissier.getStatut())
-		.setParameter("loginC", caissier.getLoginc())
-		.getSingleResult();
+				.setParameter("statut", caissier.getStatut())
+				.setParameter("loginC", caissier.getLoginc())
+				.getSingleResult();
 	}
 
 	@Override
@@ -163,9 +157,8 @@ public class CaissierDAOImpl implements CaissierDAO {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Caissier> query = currentSession.createQuery(QueryHelper.SQL_F_LOGIN_PARTNER, Caissier.class);
 		query.setParameter("coderace", partner.getCoderace());
-		  
-		List<Caissier> cais = query.getResultList();
-		return cais;
+
+		return query.getResultList();
 	}
 
 	@Override
@@ -173,26 +166,25 @@ public class CaissierDAOImpl implements CaissierDAO {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Caissier> query = currentSession.createQuery(QueryHelper.SQL_F_LOGIN_CODERACE, Caissier.class);
 		query.setParameter("login", login)
-		     .setParameter("id", partner);
+				.setParameter("id", partner);
 		Caissier cais = null;
 		//Caissier cais = query.getSingleResult();
 		Optional<Caissier> q = query.uniqueResultOptional();
 		if (q.isPresent()) {
 			cais = q.get();
 		}
-		
+
 		return cais;
 	}
 
 	@Override
 	public List<Caissier> findSuperAdmin() throws DAOException {
-		
+
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Caissier> query = currentSession.createQuery(QueryHelper.SQL_F_LOGIN_ADMIN, Caissier.class);
-		
-		List<Caissier> cais = query.getResultList();
-		return cais;
-		
+
+		return query.getResultList();
+
 	}
 
 }

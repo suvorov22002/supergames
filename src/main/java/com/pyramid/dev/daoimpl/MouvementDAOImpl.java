@@ -1,21 +1,17 @@
 package com.pyramid.dev.daoimpl;
 
-import java.util.Optional;
-
+import com.pyramid.dev.dao.MouvementDAO;
+import com.pyramid.dev.exception.DAOException;
+import com.pyramid.dev.model.Caissier;
+import com.pyramid.dev.model.Mouvement;
+import com.pyramid.dev.tools.QueryHelper;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.pyramid.dev.dao.MouvementDAO;
-import com.pyramid.dev.exception.DAOException;
-import com.pyramid.dev.model.Airtime;
-import com.pyramid.dev.model.Cagnotte;
-import com.pyramid.dev.model.Caissier;
-import com.pyramid.dev.model.Config;
-import com.pyramid.dev.model.Mouvement;
-import com.pyramid.dev.tools.QueryHelper;
+import java.util.Optional;
 
 @Repository
 public class MouvementDAOImpl implements MouvementDAO {
@@ -101,7 +97,7 @@ public class MouvementDAOImpl implements MouvementDAO {
 				    .setParameter("credit", credit)
 			        .executeUpdate();
 			     
-			status = res != 0 ? true : false;
+			status = res != 0;
 		}catch(DAOException e) {
 			e.printStackTrace();
 		}

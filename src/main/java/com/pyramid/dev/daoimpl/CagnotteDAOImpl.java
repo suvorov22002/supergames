@@ -1,48 +1,43 @@
 package com.pyramid.dev.daoimpl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import javax.ws.rs.core.Response;
-
+import com.pyramid.dev.dao.CagnotteDAO;
+import com.pyramid.dev.exception.DAOException;
+import com.pyramid.dev.model.Cagnotte;
+import com.pyramid.dev.model.Partner;
+import com.pyramid.dev.tools.QueryHelper;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.pyramid.dev.dao.CagnotteDAO;
-import com.pyramid.dev.exception.DAOException;
-import com.pyramid.dev.model.Cagnotte;
-import com.pyramid.dev.model.Caissier;
-import com.pyramid.dev.model.Partner;
-import com.pyramid.dev.tools.QueryHelper;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Repository
 public class CagnotteDAOImpl implements CagnotteDAO {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Override
 	public List <Cagnotte> find(Partner p) throws DAOException {
-		
+
 		List <Cagnotte> cagnotte = new ArrayList<>();
-		
+
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Cagnotte> query = currentSession.createQuery(QueryHelper.SQL_F_CAGNOTTE, Cagnotte.class);
 			query.setParameter("partner", p)
-				 .setParameter("day", new Date());
-			
+					.setParameter("day", new Date());
+
 			cagnotte = query.getResultList();
-			
+
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return cagnotte;
 	}
 
@@ -51,7 +46,7 @@ public class CagnotteDAOImpl implements CagnotteDAO {
 		int status = 0;
 		try {
 			sessionFactory.getCurrentSession().saveOrUpdate(cgt);
-			status = 1;			
+			status = 1;
 		}catch(DAOException e) {
 			e.printStackTrace();
 		}
@@ -61,12 +56,12 @@ public class CagnotteDAOImpl implements CagnotteDAO {
 	@Override
 	public int updateCagnot(long id, long code, long mise) {
 		Session currentSession = sessionFactory.getCurrentSession();
-		return (int) currentSession.createQuery(QueryHelper.SQL_U_CAGNOTTE)
-		.setParameter("barcode", code)
-		.setParameter("mise", mise)
-		.setParameter("id", id)
-		.executeUpdate();
-		
+		return currentSession.createQuery(QueryHelper.SQL_U_CAGNOTTE)
+				.setParameter("barcode", code)
+				.setParameter("mise", mise)
+				.setParameter("id", id)
+				.executeUpdate();
+
 	}
 
 	@Override
@@ -76,21 +71,20 @@ public class CagnotteDAOImpl implements CagnotteDAO {
 			sessionFactory.getCurrentSession().save(cagnotte);
 			status = true;
 		}catch(Exception e) {
-			System.err.println("Create Cagnotte - "+e);
+			e.printStackTrace();
 		}
 		return status;
 	}
 
 	@Override
 	public List<Cagnotte> findAllPendingCagnotte(Partner p) {
-		
+
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Cagnotte> query = currentSession.createQuery(QueryHelper.SQL_F_CAGNOTTE_PARTNER, Cagnotte.class);
 		query.setParameter("partner", p);
-		  
-		List<Cagnotte> cagnot = query.getResultList();
-		return cagnot;
-		
+
+		return query.getResultList();
+
 	}
 
 }

@@ -79,7 +79,7 @@ public class GameCycle implements Serializable {
 	private Jeu jeu;
 	
 	@Column
-	private String date_fin = "01/01/2015-12:00:00";;
+	private String date_fin = "01/01/2015-12:00:00";
 	
 	@Column(nullable=false, columnDefinition="int default 0")
 	private double real_percent = 0d;

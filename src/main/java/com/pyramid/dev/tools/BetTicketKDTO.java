@@ -10,11 +10,11 @@ import com.pyramid.dev.serviceimpl.ResponseBase;
 public class BetTicketKDTO extends ResponseBase {
 
 	/**
-	 * 
+	 *
 	 */
 	@JsonIgnore
 	private static final long serialVersionUID = 1L;
-	
+
 	private BetTicketK btick;
 
 	public BetTicketKDTO() {
@@ -28,26 +28,28 @@ public class BetTicketKDTO extends ResponseBase {
 		this.setMessage(message);
 		this.btick = btick;
 	}
-	
+
+	@Override
 	public Boolean status() {
 		if(StringUtils.equalsIgnoreCase(this.getCode(), ResponseHolder.FAIL)) return Boolean.FALSE;
 		else return Boolean.TRUE;
 	}
-	
+
 	public static BetTicketKDTO getInstance(){
 		return new BetTicketKDTO();
 	}
-	
+
 	public BetTicketKDTO event(BetTicketK btick) {
 		this.setBtick(btick);
 		return this;
 	}
-	
+
+	@Override
 	public BetTicketKDTO error(String code) {
 		this.setCode(code);
 		return this;
 	}
-	
+
 	public BetTicketKDTO sucess(String msg) {
 		this.setCode(ResponseHolder.SUCESS);
 		//this.setError(msg);
@@ -62,5 +64,5 @@ public class BetTicketKDTO extends ResponseBase {
 	public void setBtick(BetTicketK btick) {
 		this.btick = btick;
 	}
-	
+
 }

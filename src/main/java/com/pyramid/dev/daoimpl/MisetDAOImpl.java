@@ -2,6 +2,7 @@ package com.pyramid.dev.daoimpl;
 
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -16,15 +17,16 @@ import com.pyramid.dev.model.Partner;
 import com.pyramid.dev.tools.QueryHelper;
 
 @Repository
+@Slf4j
 public class MisetDAOImpl implements MisetDAO {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Override
 	public boolean create(Miset miset) throws DAOException {
 		boolean status = false;
-		Miset mt = null;
+
 		try {
 			sessionFactory.getCurrentSession().save(miset);
 			status = true;
@@ -40,8 +42,7 @@ public class MisetDAOImpl implements MisetDAO {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Miset> query = currentSession.createQuery("from Miset where idMiseT:=idMiseT", Miset.class);
 		query.setParameter("idMiseT", miset.getIdMiseT());
-		Miset mt = query.getSingleResult();
-		return mt;
+		return query.getSingleResult();
 	}
 
 	@Override
@@ -72,8 +73,8 @@ public class MisetDAOImpl implements MisetDAO {
 	public synchronized int findId(Partner partner) throws DAOException {
 		Session currentSession = sessionFactory.getCurrentSession();
 		return (int) currentSession.createQuery(QueryHelper.SQL_F_MISET_MAX_ID)
-		.setParameter("coderace", partner)
-		.getSingleResult();
+				.setParameter("coderace", partner)
+				.getSingleResult();
 	}
 
 	@Override
@@ -84,18 +85,17 @@ public class MisetDAOImpl implements MisetDAO {
 			Query<Miset> query = currentSession.createQuery(QueryHelper.SQL_F_BARCODE, Miset.class);
 			query.setParameter("barcode", barcode);
 			//mt = query.getSingleResult();
-			
+
 			Optional<Miset> q = query.uniqueResultOptional();
 			if (q.isPresent()) {
 				mt = q.get();
 				return mt;
 			}
-		}
-		catch(Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		return mt;
-		
+
 	}
 
 	@Override
@@ -103,26 +103,24 @@ public class MisetDAOImpl implements MisetDAO {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Miset> query = currentSession.createQuery(QueryHelper.SQL_F_BARC_MISET, Miset.class);
 		query.setParameter("barcode", barcode)
-		     .setParameter("idMiseT", miset);
-		Miset mt = query.getSingleResult();
-		return mt;
+				.setParameter("idMiseT", miset);
+		return query.getSingleResult();
 	}
 
 	@Override
 	public Miset findById(Long idmiset) throws DAOException {
-		
+
 		Miset mt = null;
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Miset> query = currentSession.createQuery(QueryHelper.SQL_F_MISET_ID, Miset.class);
 			query.setParameter("idMiseT", idmiset);
-			     
+
 			mt = query.getSingleResult();
-		}
-		catch(Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return mt;
 	}
 
@@ -151,11 +149,11 @@ public class MisetDAOImpl implements MisetDAO {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Miset> query = currentSession.createQuery(QueryHelper.SQL_F_EXITS_BARCODE, Miset.class);
 			query.setParameter("barcode", ""+code)
-				 .setParameter("jeu", jeu);
-			     
+					.setParameter("jeu", jeu);
+
 			mt = query.getSingleResult();
 		}catch(Exception e) {
-			System.err.println("Exception-findBarcode: "+e);
+			log.warn("Exception-findBarcode: "+e.getMessage());
 		}
 		return mt;
 	}

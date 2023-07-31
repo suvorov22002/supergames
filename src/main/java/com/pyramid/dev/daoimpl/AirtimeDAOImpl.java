@@ -1,32 +1,28 @@
 package com.pyramid.dev.daoimpl;
 
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.lang3.time.DateFormatUtils;
+import com.pyramid.dev.dao.AirtimeDAO;
+import com.pyramid.dev.exception.DAOException;
+import com.pyramid.dev.model.Airtime;
+import com.pyramid.dev.model.Caissier;
+import com.pyramid.dev.tools.DateUtils;
+import com.pyramid.dev.tools.QueryHelper;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.pyramid.dev.dao.AirtimeDAO;
-import com.pyramid.dev.exception.DAOException;
-import com.pyramid.dev.model.Airtime;
-import com.pyramid.dev.model.Cagnotte;
-import com.pyramid.dev.model.Caissier;
-import com.pyramid.dev.model.Keno;
-import com.pyramid.dev.tools.DateUtils;
-import com.pyramid.dev.tools.QueryHelper;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class AirtimeDAOImpl implements AirtimeDAO {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Override
 	public boolean create(Airtime airtime) throws DAOException {
 		boolean status = false;
@@ -66,7 +62,7 @@ public class AirtimeDAOImpl implements AirtimeDAO {
 	@Override
 	public Airtime find(Caissier user) throws DAOException {
 		Airtime credit = null;
-		
+
 		try {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Airtime> query = currentSession.createQuery(QueryHelper.SQL_F_CREDIT, Airtime.class);
@@ -88,21 +84,20 @@ public class AirtimeDAOImpl implements AirtimeDAO {
 		return null;
 	}
 
-	
+
 	@Override
 	public List<Airtime> find(Caissier caissier, String dat1, String dat2) throws DAOException {
-		
+
 		Date d = Date.from(DateUtils.parse(dat1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 		Date f = Date.from(DateUtils.parse(dat2).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-		
+
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Airtime> query = currentSession.createQuery(QueryHelper.SQL_UF_CREDIT, Airtime.class);
 		query.setParameter("caissier", caissier)
-		     .setParameter("date1", d)
-		     .setParameter("date2", f);
-		  
-		List<Airtime> ken = query.getResultList();
-		return ken;
+				.setParameter("date1", d)
+				.setParameter("date2", f);
+
+		return query.getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -110,20 +105,20 @@ public class AirtimeDAOImpl implements AirtimeDAO {
 	public double findCumulCredit(Caissier caissier, String dat1, String dat2) throws DAOException {
 		Date d = Date.from(DateUtils.parse(dat1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 		Date f = Date.from(DateUtils.parse(dat2).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-		System.out.println(d +" DDDD "+f);
+
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<Double> query = currentSession.createQuery(QueryHelper.SQL_UF_S_CREDIT);
 		query.setParameter("caissier", caissier)
-			.setParameter("date1", d)
-			.setParameter("date2", f);
-		   
-		
+				.setParameter("date1", d)
+				.setParameter("date2", f);
+
+
 		Optional<Double> q = query.uniqueResultOptional();
 		if (q.isPresent()) {
 			Double sum = q.get();
 			return sum.doubleValue();
 		}
-		
+
 		return 0;
 	}
 
