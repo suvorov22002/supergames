@@ -32,16 +32,29 @@ public class MisekDAOImpl implements MisekDAO {
 	private SessionFactory sessionFactory;
 	
 	@Override
-	public boolean create(Misek misek) throws DAOException {
-		boolean status = false;
+	public Misek create(Misek misek) throws DAOException {
+
 		Misek mk = null;
 		try {
-			sessionFactory.getCurrentSession().save(misek);
-			status = true;
+
+			Session currentSession = sessionFactory.getCurrentSession();
+			long result = (long) currentSession.save(misek);
+
+			if (result != 0) {
+				Query<Misek> query = currentSession.createQuery(QueryHelper.SQL_F_MISEK_TICKET, Misek.class);
+
+				query.setParameter("numeroTicket", misek.getNumeroTicket());
+
+				List<Misek> q = query.getResultList();
+
+				mk = q.stream().findFirst().orElse(null);
+
+			}
+
 		}catch(DAOException e) {
 			e.printStackTrace();
 		}
-		return status;
+		return mk;
 		
 	}
 

@@ -2,18 +2,24 @@ package com.pyramid.dev.controller;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
+import com.pyramid.dev.model.*;
+import com.pyramid.dev.tools.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,33 +34,6 @@ import com.pyramid.dev.enums.EtatMise;
 import com.pyramid.dev.enums.Jeu;
 import com.pyramid.dev.enums.Room;
 import com.pyramid.dev.exception.DAOException;
-import com.pyramid.dev.model.AdminTicketDto;
-import com.pyramid.dev.model.Airtime;
-import com.pyramid.dev.model.BetTicketK;
-import com.pyramid.dev.model.BonusSet;
-import com.pyramid.dev.model.Cagnotte;
-import com.pyramid.dev.model.CagnotteDto;
-import com.pyramid.dev.model.Caissier;
-import com.pyramid.dev.model.CaissierDto;
-import com.pyramid.dev.model.Config;
-import com.pyramid.dev.model.EffChoicek;
-import com.pyramid.dev.model.GameCycle;
-import com.pyramid.dev.model.GameCycleDto;
-import com.pyramid.dev.model.Groupe;
-import com.pyramid.dev.model.Keno;
-import com.pyramid.dev.model.KenoRes;
-import com.pyramid.dev.model.Misek;
-import com.pyramid.dev.model.MisekDto;
-import com.pyramid.dev.model.Misek_temp;
-import com.pyramid.dev.model.Miset;
-import com.pyramid.dev.model.Mouvement;
-import com.pyramid.dev.model.Partner;
-import com.pyramid.dev.model.PartnerDto;
-import com.pyramid.dev.model.Profil;
-import com.pyramid.dev.model.ResponseData;
-import com.pyramid.dev.model.ShiftDay;
-import com.pyramid.dev.model.TraceCycle;
-import com.pyramid.dev.model.Versement;
 import com.pyramid.dev.responsecode.ResponseHolder;
 import com.pyramid.dev.service.AirtimeService;
 import com.pyramid.dev.service.CagnotteService;
@@ -71,18 +50,6 @@ import com.pyramid.dev.service.MouvementService;
 import com.pyramid.dev.service.PartnerService;
 import com.pyramid.dev.service.TraceCycleService;
 import com.pyramid.dev.service.VersementService;
-import com.pyramid.dev.tools.BetTicketKDTO;
-import com.pyramid.dev.tools.BonusSetDTO;
-import com.pyramid.dev.tools.CagnotteDTO;
-import com.pyramid.dev.tools.CaissierDTO;
-import com.pyramid.dev.tools.ControlDisplayKeno;
-import com.pyramid.dev.tools.KenoDTO;
-import com.pyramid.dev.tools.KenoResDTO;
-import com.pyramid.dev.tools.Params;
-import com.pyramid.dev.tools.PartnerDTO;
-import com.pyramid.dev.tools.ShiftDTO;
-import com.pyramid.dev.tools.Utile;
-import com.pyramid.dev.tools.VersementDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,7 +63,7 @@ public class Controller {
 
 
 	//private static Log log = LogFactory.getLog(Controller.class);
-	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
+
 	private final PartnerService partnerservice;
 	private final KenoService kenoservice;
 	private final CaissierService caisservice;
@@ -110,12 +77,12 @@ public class Controller {
 	private final EffChoicekService efkservice;
 	private final VersementService verservice;
 	private final AirtimeService airtservice;
-	private final Misek_tempService mtpservice;
 	private final CagnotteService cagnotservice;
 	private final GroupeService grpeservice;
 	private final ConfigService configservice;
 	private final SuperGameManager supermanager;
 	private final ApplicationContext applicationContext;
+	private final ControllerUtils controllerUtils;
 
 //	private CaissierService caiservice;
 
@@ -190,7 +157,7 @@ public class Controller {
 	}
 
 	@GetMapping("list-partners")
-	public Response allpartners() {
+	public ResponseEntity<ApiResponse> allpartners() {
 
 		JSONObject ob = new JSONObject();
 		try {
@@ -202,14 +169,20 @@ public class Controller {
 					.collect(Collectors.toList());
 
 			if (!listparternaires.isEmpty()) {
-				ob.put("partners", listparternaires);
-				String eve = Utile.convertJsonToString(ob);
-				return Response.ok(ResponseData.getInstance().event(eve).sucess("")).build();
+//				ob.put("partners", listparternaires);
+//				String eve = Utile.convertJsonToString(ob);
+				//return Response.ok(ResponseData.getInstance().event(eve).sucess("")).build();
+
+				return controllerUtils.getResponse(ApiResponse.builder().data(listparternaires).build());
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		return Response.ok(ResponseData.getInstance().error("")).build();
+
+		return controllerUtils
+				.getResponse(ApiResponse.builder().success(false).status(HttpStatus.NO_CONTENT)
+						.message("").build());
+
 	}
 
 	private PartnerDto topartnerDto(Partner partner) {
@@ -290,24 +263,24 @@ public class Controller {
 
 		ControlDisplayKeno cds = Utile.display_draw.get(coderace);
 		KenoRes kres = new KenoRes();
-		//return partnerservice.retrieveDrawCombi(cds);
+		Partner part = partnerservice.findById(coderace);
+
+		if(cds == null) {
+			return Response.ok(KenoResDTO.getInstance().error("Partenaire inconnu")).build();
+		}
 
 		try {
 			kres.setDrawnumbK(cds.getDrawCombik());
-
 			kres.setDrawnumK(cds.getDrawNumk());
 			kres.setMultiplicateur(cds.getMultiplix());
-			kres.setBonusKamount(cds.getBonuskamount());
+			kres.setBonusKamount(part.getBonuskamount());
 			kres.setGameState(cds.getGameState());
 			kres.setStr_draw_combi(cds.getStr_draw_combi());
 			kres.setHeureTirage(cds.getHeureTirage());
-//			 if(cds.getGameState() > 2) {
-//				 kres.setDrawnumK(cds.getDrawNumk() - 1);
-//			 }
 
 			return Response.ok(KenoResDTO.getInstance().event(kres).sucess("")).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			return Response.ok(KenoResDTO.getInstance().error(e.getMessage())).build();
 		}
 
@@ -431,7 +404,7 @@ public class Controller {
 	}
 
 	@GetMapping("findticket/{coderace}/{barcode}")
-	public Response verifyTicket(@PathVariable("coderace") String coderace, @PathVariable("barcode") String barcode) {
+	public ResponseEntity<ApiResponse> verifyTicket(@PathVariable("coderace") String coderace, @PathVariable("barcode") String barcode) {
 
 		double bonusWinAmount;
 		boolean bonusDown = false;
@@ -443,14 +416,18 @@ public class Controller {
 		List<Misek> listeTicket;
 
 		try {
-			//recherche du ticket dans miset
+			// Verfication de l'existence du ticket
 			log.info("Controler "+barcode);
 			barcode = barcode.length() == 13 ? barcode.substring(0, 12) : barcode;
 			Miset miset = mstservice.searchTicketT(barcode);
 			codeBarre = barcode;
 			// ticket non existant
 			if(miset == null) {
-				return Response.ok(BetTicketKDTO.getInstance().error(ResponseHolder.TCKINCON)).build();
+
+				return controllerUtils
+						.getResponse(ApiResponse.builder().success(false).status(HttpStatus.PRECONDITION_FAILED)
+								.message(EtatMise.TCKINCON.value()).build());
+
 			}
 
 			//le ticket est en attente de traitement
@@ -484,7 +461,7 @@ public class Controller {
 
 
 						EffChoicek tick;
-						List<EffChoicek> list_efchk = new ArrayList<>();
+						List<EffChoicek> listEfchk = new ArrayList<>();
 						StringBuilder strMulti = new StringBuilder();
 
 						// je verifie si le ticket est celui du partenaire
@@ -494,10 +471,13 @@ public class Controller {
 							Versement vers = verservice.find_vers_miset(miset.getIdMiseT());
 
 							if(vers != null) {
-								// log.info("controller-already vers "+vers.getMise());
+								log.info("controller-already vers: "+vers);
 								BetTicketK b = new BetTicketK();
 								b.setVers(vers);
-								return Response.ok(BetTicketKDTO.getInstance().event(b).sucess("").error(ResponseHolder.TCKALRPAID)).build();
+								b.setMessage(EtatMise.TCKALRPAID.value());
+								return controllerUtils
+										.getResponse(ApiResponse.builder().success(true).data(b).status(HttpStatus.PRECONDITION_FAILED)
+												.message(EtatMise.TCKALRPAID.value()).build());
 							}
 
 							// Ticket reconnu et correct - Traitement.
@@ -512,7 +492,7 @@ public class Controller {
 							betk.setBarcode(barcode);
 							betk.setHeureMise(listeTicket.get(0).getHeureMise());
 							betk.setDateMise(listeTicket.get(0).getDateMise());
-							betk.setCaissier(listeTicket.get(0).getCaissier().getIdCaissier());
+							betk.setCaissier(listeTicket.get(0).getCaissier().getLoginc());
 							betk.setIdMiseT(miset.getIdMiseT());
 							// betk.setSummise(listeTicket.stream().collect(Collectors.summingDouble(Misek::getSumMise)));
 							betk.setSummise(listeTicket.size() * listeTicket.get(0).getSumMise());
@@ -525,33 +505,23 @@ public class Controller {
 								ticket = efkservice.searchTicketK(mk);
 								log.info("Controler - ticket "+ticket.size());
 
-								if( ticket != null && !ticket.isEmpty()){
+								if(!ticket.isEmpty()){
 
 
 									betk.setCotejeu(Double.parseDouble(ticket.get(0).getCote()));
-//								 betk.setBarcode(barcode);
-//								 betk.setHeureMise(mk.getHeureMise());
-//								 betk.setDateMise(mk.getDateMise());
-//								 betk.setCaissier(mk.getCaissier().getIdCaissier());
-//								 betk.setIdMiseT(miset.getIdMiseT());
-//								 betk.setSummise(mk.getSumMise());
-//								 betk.setMultiplicite(ticket.size());
 
 									num_draw = mk.getDrawnumk();
 									//recherche du numero de tirage en cours
-//					    		 Keno _keno = kenoservice.find_Max_draw(p);
-									//Keno _keno = kenoservice.searchResultK(num_draw, p);
-
 									multi = ticket.size();
 
 									// Recherche du resultat des differents elements
 
 									Long idMiseTicketKeno = mk.getIdMiseK();
 									Predicate<Cagnotte> predicate = pre -> pre.getMise() == idMiseTicketKeno;
-									Predicate<Cagnotte> predicate1 = pr -> pr.getBarcode() == Long.valueOf(codeBarre);
+									Predicate<Cagnotte> predicate1 = pr -> pr.getBarcode() == Long.parseLong(codeBarre);
 									boolean evalCagnotte = false;
 
-									for(int i=0;i< multi;i++){
+									for(int i=0; i< multi; i++){
 
 										int num = i + num_draw;
 										k_keno = kenoservice.searchResultK(num, p);
@@ -564,8 +534,6 @@ public class Controller {
 
 											strMulti.append("-");
 											strMulti.append(k_keno.getMultiplicateur());
-
-											//betk.setXmulti(k_keno.getMultiplicateur());
 											bonusWinAmount = k_keno.getBonusKamount();
 
 											if(bonusWinAmount != 0) {
@@ -584,15 +552,6 @@ public class Controller {
 												tick.setDrawnum(num);
 												tick.setIdkeno(k_keno.getIdKeno());
 
-//												for(int ii=0;ii<str_result.length;ii++){
-//													if(ii<10){
-//														str0 = str0+" "+str_result[ii];
-//													} else if (ii>9 && ii<20){
-//														str1 = str1+" "+str_result[ii];
-//													}
-//												}
-
-
 												//le prix d'un evenement
 												double gain_total = 0;
 
@@ -600,7 +559,7 @@ public class Controller {
 
 												if(odd != 0 && odd != -1){
 
-													tick.setCote(""+odd);
+													tick.setCote(String.valueOf(odd));
 													gain_total = gain_total + odd * Double.parseDouble(tick.getMtchoix());
 
 													// verifie si le multiplicateur a été activé sur le ticket
@@ -639,7 +598,7 @@ public class Controller {
 
 
 												betk.setSumWin(gain_total + betk.getSumWin());
-												list_efchk.add(tick);
+												listEfchk.add(tick);
 
 											} else {
 
@@ -647,7 +606,7 @@ public class Controller {
 												tick.setDrawresult(" ");
 												tick.setDrawnum(num);
 												tick.setIdkeno(k_keno.getIdKeno());
-												list_efchk.add(tick);
+												listEfchk.add(tick);
 											}
 										} else {
 											// Tirage pas encore déroulé
@@ -655,7 +614,7 @@ public class Controller {
 
 											tick.setDrawresult(" ");
 											tick.setDrawnum(num);
-											list_efchk.add(tick);
+											listEfchk.add(tick);
 
 											//betk.setList_efchk(list_efchk);
 											//return Response.ok(BetTicketKDTO.getInstance().event(betk).error(ResponseHolder.TCKNEVAL)).build();
@@ -665,14 +624,16 @@ public class Controller {
 
 								}
 							}
-							betk.setXmulti(strMulti.toString().substring(1));
-							betk.setList_efchk(list_efchk);
+							betk.setXmulti(strMulti.substring(1));
+							betk.setListEfchk(listEfchk);
 							if (eval) {
-								log.info("Controler - betk "+betk.toString());
-								return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("")).build();
+								log.info("Controler - betk "+ betk);
+								return controllerUtils.getResponse(ApiResponse.builder().data(betk).build());
 							} else {
-								//return Response.ok(BetTicketKDTO.getInstance().event(betk).error(ResponseHolder.TCKNEVAL)).build();
-								return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("").error(ResponseHolder.TCKNEVAL)).build();
+								betk.setMessage(EtatMise.TCKNEVAL.value());
+								return controllerUtils
+										.getResponse(ApiResponse.builder().success(true).data(betk).status(HttpStatus.PRECONDITION_FAILED)
+												.message(EtatMise.TCKNEVAL.value()).build());
 							}
 
 
@@ -683,12 +644,16 @@ public class Controller {
 //		      				 
 						} else {
 							// Mauvais partenaire
-							//return Response.ok(BetTicketKDTO.getInstance().error(ResponseHolder.TCKNRECON)).build();
-							return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("").error(ResponseHolder.TCKNRECON)).build();
+
+							return controllerUtils
+									.getResponse(ApiResponse.builder().success(false).status(HttpStatus.PRECONDITION_FAILED)
+											.message(EtatMise.TCKNRECON.value()).build());
 						}
 					} else {
 						//return Response.ok(BetTicketKDTO.getInstance().error(ResponseHolder.TCKNREG)).build();
-						return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("").error(ResponseHolder.TCKNREG)).build();
+						return controllerUtils
+								.getResponse(ApiResponse.builder().success(false).status(HttpStatus.INTERNAL_SERVER_ERROR)
+										.message(EtatMise.TCKNREG.value()).build());
 					}
 					//break;
 				case "Spin":
@@ -699,12 +664,14 @@ public class Controller {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			//	e.printStackTrace();
-			return Response.ok(BetTicketKDTO.getInstance().error(e.getMessage())).build();
+			return controllerUtils
+					.getResponse(ApiResponse.builder().success(false).status(HttpStatus.INTERNAL_SERVER_ERROR)
+							.message(e.getMessage()).build());
 		}
 
-		return Response.ok(BetTicketKDTO.getInstance().sucess("")).build();
+		return controllerUtils
+				.getResponse(ApiResponse.builder().success(false).status(HttpStatus.NO_CONTENT)
+						.message("e.getMessage()").build());
 	}
 
 	@GetMapping("versement/{barcode}/{montant}/{id}")
@@ -737,7 +704,7 @@ public class Controller {
 				if(ajout) {
 					versemt.setCaissier(caissier);
 					versemt.setDatV(txtDate);
-					versemt.setHeureV(""+tms);
+					versemt.setHeureV(String.valueOf(tms));
 					versemt.setTypeVers(miset.getTypeJeu().getValue());
 					versemt.setMontant(montant);
 					versemt.setMise(miset.getIdMiseT());
@@ -778,11 +745,15 @@ public class Controller {
 
 		ControlDisplayKeno cds = Utile.display_draw.get(coderace);
 
+		if(cds == null) {
+			return Response.ok(CagnotteDTO.getInstance().error("NOT FOUND")).build();
+		}
+
 		Optional<Cagnotte> optcg = cagnotservice.findAllPendingCagnotte(cds.getPartner()).stream()
 				.filter(c -> c.getBarcode() == 0L).findFirst();
 
 		if(optcg.isPresent()) {
-			System.out.println("Coderace cagnotte: " + cds.getPartner().getCoderace());
+			//System.out.println("Coderace cagnotte: " + cds.getPartner().getCoderace());
 			CagnotteDto cgntDto = mapObjToObjDTO(optcg.get(), CagnotteDto.class);
 			return Response.ok(CagnotteDTO.getInstance().event(cgntDto).sucess("")).build();
 
@@ -825,11 +796,11 @@ public class Controller {
 
 	@PostMapping("save-misek")
 	public boolean saveMisek(@RequestBody Misek misek) {
-		return mskservice.create(misek);
+		return mskservice.create(misek) != null;
 	}
 
 	@PostMapping("update-misek/{misek_id}")
-	public boolean updateMisek(@RequestBody Misek misek,@PathVariable("misek_id") Long misek_id) {
+	public boolean updateMisek(@RequestBody Misek misek, @PathVariable("misek_id") Long misek_id) {
 		misek.setIdMiseK(misek_id);
 		return mskservice.update(misek);
 	}
@@ -944,6 +915,8 @@ public class Controller {
 			return Response.ok(CaissierDTO.getInstance().error("ERREUR LOGIN INCORRECT")).build();
 		}
 
+		Caissier caisse = caisservice.findByLogin(login);
+
 		ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
 		passwordEncryptor.setAlgorithm( Params.ALGO_CHIFFREMENT );
 		passwordEncryptor.setPlainDigest( false );
@@ -1021,118 +994,189 @@ public class Controller {
 	}
 
 	@PostMapping(value = "placeslip-keno/{partner}", produces = "application/json")
-	public Response registerSlipK(@RequestBody BetTicketK betk, @PathVariable("partner") String partner) {
-		boolean ajout;
+	@Transactional
+	public ResponseEntity<ApiResponse> registerSlipK(@RequestBody BetTicketK betkT, @PathVariable("partner") String partner) {
+
+		// On verifie si le partenaire existe. (recherche du caissier par login)
+		Partner part = partnerservice.findById(partner);
+
+		if (part == null) {
+
+			return controllerUtils
+					.getResponse(ApiResponse.builder().success(false).status(HttpStatus.PRECONDITION_FAILED)
+							.message(EtatMise.UNKNOWPARTNER.value()).build());
+
+		}
+
+
+		// Verification du caissier
+		Caissier user = caisservice.findByLogin(betkT.getCaissier());
+
+		if (user == null || !StringUtils.equals(user.getPartner().getCoderace(), partner)) {
+
+			return controllerUtils
+					.getResponse(ApiResponse.builder().success(false).status(HttpStatus.PRECONDITION_FAILED)
+							.message(EtatMise.UNKNOWNCASHIER.value()).build());
+
+
+		}
+
+		// Verification de la balance
+		double balance = mvtservice.findMvt(user);
+
+		if (betkT.getSummise() > balance) {
+
+			return controllerUtils
+					.getResponse(ApiResponse.builder().success(false).status(HttpStatus.PRECONDITION_FAILED)
+							.message(EtatMise.BALANCE.value()).build());
+
+		}
+
+		BetTicketK betk = new BetTicketK();
+
+		betk.setCoderace(partner);
+		betk.setCaissier(user.getLoginc());
+		betk.setHeureMise(betkT.getHeureMise());
+		betk.setDateMise(betkT.getDateMise());
+		betk.setXmulti(betkT.getXmulti());
+		betk.setMultiplicite(betkT.getMultiplicite());
+		betk.setEvent(betkT.getEvent());
+		betk.setParil(betkT.getParil());
+		betk.setKchoice(betkT.getKchoice());
+		betk.setSummise(betkT.getSummise());
+
+		// Tout est correct - Récuperation des données du tirage en cours
+		Keno keno = kenoservice.find_Max_draw(part);
+
+		if (keno == null || keno.getDrawnumK() != betkT.getDrawnumk()) {
+
+			return controllerUtils
+					.getResponse(ApiResponse.builder().success(false).status(HttpStatus.PRECONDITION_FAILED)
+							.message(EtatMise.UNKNOWNDRAW.value()).build());
+
+		}
+
+		betk.setKeno(keno.getIdKeno());
+		betk.setDrawnumk(keno.getDrawnumK());
+
+		boolean ajout = false;
 		double bonusrate = 0;
-		double amountbonus;
+		long amountbonus;
+		long barcode;
 		Config cfg;
 
 		Miset miset = new Miset();
 
-		//	System.out.println("TIME BARCODE 1: " + time1);
 		//recherche du code barre
-		long barcode;
 		barcode = supermanager.searchBarcode(Jeu.K);
 
-		miset.setBarcode(""+barcode);
+		//ajout dans miset
+
+		miset.setBarcode(String.valueOf(barcode));
 		miset.setTypeJeu(Jeu.K);
-		miset.setSummise(betk.getSummise());
+		miset.setSummise(betkT.getSummise());
+		miset.setCoderace(part);
+		ajout = mstservice.create(miset);
 
-		Partner part = partnerservice.findById(partner);
-		betk.setBonusCod(1 + part.getBonuskcode());
-//		PartnerDTO pdto = (PartnerDTO) res.getEntity();
-//		Partner part = pdto.getPart();
-
-		Caissier cais = new Caissier();
-		cais.setIdCaissier(betk.getCaissier());
-		Caissier c = caisservice.findById(cais);
-
-		Keno ken = new Keno();
-		ken.setIdKeno(betk.getKeno());
-		KenoDTO kdto = (KenoDTO) kenoservice.find(ken).getEntity();
-		Keno k = kdto.getKen();
 
 		//recuperation du bonusrate
 		cfg = cfgservice.find(part);
 		if(cfg != null) {
 			bonusrate = cfg.getBonusrate();
 		}
-		amountbonus = part.getBonuskamount();
-
-		miset.setCoderace(part);
-		//ajout dans miset
-		ajout = mstservice.create(miset);
+		amountbonus = (long) part.getBonuskamount();
 
 
 		if(ajout) {
 
 			Long numeroTicket = Long.valueOf(Utile.formatter.format(new Date()));
-			betk.setIdMiseT(miset.getIdMiseT());
+			Miset storeMiset = mstservice.findBarcode(barcode, Jeu.K);
+
+			betk.setIdMiseT(storeMiset.getIdMiseT());
 			betk.setBarcode(String.valueOf(barcode));
+			betk.setBonusCod(1 + part.getBonuskcode());
+
 			Misek misek;
 			double mise_min = 0;
-			int multiplicite = betk.getMultiplicite();
-			mise_min = betk.getSummise()/multiplicite;
-			//	log.info("Mise: " + betk.getSummise() + " Min Mise: " + mise_min);
+			int multiplicite = betkT.getMultiplicite();
+
+			mise_min = betkT.getSummise()/multiplicite;
 			mise_min = (double)((int)(mise_min*100))/100;
+
 			EffChoicek effchoicek;
-			List<EffChoicek> list_efchk = new ArrayList<>();
+			List<EffChoicek> listEfchk = new ArrayList<>();
+			Misek misek1;
 
 			for(int jj = 0; jj  < multiplicite; jj++) {
 
 				misek = new Misek();
-				misek.setCaissier(c);
-				misek.setHeureMise(betk.getHeureMise());
+				misek.setCaissier(user);
+				misek.setHeureMise(betkT.getHeureMise());
 				misek.setSumMise(mise_min);
-				misek.setDateMise(betk.getDateMise());
+				misek.setDateMise(betkT.getDateMise());
 				misek.setEtatMise(EtatMise.ATTENTE);
-				misek.setDrawnumk(betk.getDrawnumk() + jj);
-				misek.setBonusCod(betk.getBonusCod());
+				misek.setDrawnumk(keno.getDrawnumK() + jj);
+				misek.setBonusCod(1 + part.getBonuskcode());
 				misek.setMiset(miset);
-				misek.setKeno(k);
-				misek.setXmulti(Integer.parseInt(betk.getXmulti()));
+				misek.setKeno(keno);
+				misek.setXmulti(Integer.parseInt(betkT.getXmulti()));
 				misek.setNumeroTicket(numeroTicket);
 				//ajout misek
-				mskservice.create(misek);
+				misek1 = mskservice.create(misek);
 
 				// Ajout des evenements
 				effchoicek = new EffChoicek();
 
-				effchoicek.setIdparil(betk.getParil());
-				effchoicek.setMisek(misek);
-				effchoicek.setKchoice(betk.getKchoice());
-				effchoicek.setMtchoix(""+mise_min);
-				effchoicek.setCote(""+betk.getCotejeu());
-				effchoicek.setDrawnum(betk.getDrawnumk() + jj);
+				effchoicek.setIdparil(betkT.getParil());
+
+				effchoicek.setMisek(misek1);
+				effchoicek.setKchoice(betkT.getKchoice());
+				effchoicek.setMtchoix(String.valueOf(mise_min));
+				effchoicek.setCote(String.valueOf(betkT.getCotejeu()));
+				effchoicek.setDrawnum(keno.getDrawnumK() + jj);
 				effchoicek.setDrawresult("");
 
 				ajout = efkservice.create(effchoicek);
 
-				if(ajout) list_efchk.add(effchoicek);
+				if ( ajout ) {
+					listEfchk.add(effchoicek);
+				}
 
 			}
 
-			betk.setList_efchk(list_efchk);
+			betk.setListEfchk(listEfchk);
 			//mise à jour du credit du caissier
-			double mvtprice = mvtservice.findMvt(c);
-			Mouvement mvnt = mvtservice.findByCaissier(c);
-			mvnt.setMvt(mvtprice - betk.getSummise());
-			mvnt.setCaissier(c);
+			Mouvement mvnt = mvtservice.findByCaissier(user);
+			mvnt.setMvt(balance - betkT.getSummise());
+			mvnt.setCaissier(user);
 			ajout = mvtservice.update(mvnt);
+
 			if(!ajout) {
-				return Response.ok(BetTicketKDTO.getInstance().error("ERREUR DE MISE A JOUR DU SOLDE CAISSE")).build();
+
+				return controllerUtils
+						.getResponse(ApiResponse.builder().success(false).status(HttpStatus.INTERNAL_SERVER_ERROR)
+								.message("ERREUR DE MISE A JOUR DU SOLDE CAISSE").build());
+
 			}
-			amountbonus +=  mise_min*bonusrate;
+
+			betk.setMvt(balance - betkT.getSummise());
+
+			amountbonus +=  mise_min * bonusrate;
+			betk.setBonusAmount(amountbonus);
+
+			// Mise à jour des données du partenaires (montant bonus et code bonus)
 			part.setBonuskamount(amountbonus);
-			part.setBonuskcode(betk.getBonusCod());
+			part.setBonuskcode(1 + part.getBonuskcode());
 			partnerservice.update(part);
-			//	partnerservice.update_bonusk(amountbonus, betk.getBonusCod(), part);
 
-			//	System.out.println("TIME BARCODE 2: " + (time2 - time1));
+			return controllerUtils.getResponse(ApiResponse.builder().data(betk).build());
 
-			return Response.ok(BetTicketKDTO.getInstance().event(betk).sucess("")).build();
 		} else {
-			return Response.ok(BetTicketKDTO.getInstance().error("ERREUR DE CREATION DU BARCODE")).build();
+
+			return controllerUtils
+					.getResponse(ApiResponse.builder().success(false).status(HttpStatus.INTERNAL_SERVER_ERROR)
+							.message("ERREUR DE CREATION DU BARCODE").build());
+
 		}
 
 	}
@@ -1170,10 +1214,14 @@ public class Controller {
 
 	@GetMapping("getstate/{coderace}/{state}")
 	public Response retrieveState(@PathVariable("coderace") String coderace, @PathVariable("state") int state) {
+
 		JSONObject ob = new JSONObject();
 		try {
 			ControlDisplayKeno cds = Utile.display_draw.get(coderace);
-			//  cds.setGameState(state);
+			if (cds == null) {
+				return Response.ok(ResponseData.getInstance().error("Partenaire non reconnu.")).build();
+			}
+
 			if(state == 1){
 				//  log.info("[CONTROLLER FINISH DRAW STEP 1] "+cds.getCoderace());
 				cds.setDraw_finish(Boolean.TRUE);
@@ -1191,15 +1239,17 @@ public class Controller {
 			} else if(state == 3 && cds.getGameState() != 3){
 				//  log.info("[CONTROLLER FINISH DRAW STEP 3] "+cds.getCoderace());
 				cds.setGameState(3);
-				int num_tirage = 1+cds.getDrawNumk();
+				int num_tirage = 1 + cds.getDrawNumk();
 				//		log.info("DRAW Ajout d'une nouvelle ligne de tirage "+coderace );
 				boolean line = supermanager.addKenos(num_tirage, cds.getPartner());
 
 				//		log.info("Nouvelle ligne de tirage added "+line );
 				if(line){
-					log.info("[CONTROLLER MISE A JOUR DU CYCLE] "+cds.getCoderace());
+
 					cycleAJour(cds);
 					cds.setDrawNumk(num_tirage);
+
+					log.info("[CONTROLLER MISE A JOUR DU CYCLE] "+cds.getCoderace() + "  " + cds.getDrawNumk());
 				}
 				//	cds.setTimeKeno(UtileKeno.timeKeno);
 				cds.setCanbet(true);
@@ -1232,6 +1282,7 @@ public class Controller {
 
 	@GetMapping("search-bonus/{coderace}")
 	public Response searchBonus(@PathVariable("coderace") String coderace) {
+
 		ControlDisplayKeno cds = Utile.display_draw.get(coderace);
 		// log.info("searchBonus finish");
 		BonusSet bs = new BonusSet();
@@ -1243,6 +1294,7 @@ public class Controller {
 		bs.setBarcode(cds.getBarcodeCagnot());
 		bs.setMise(cds.getMiseCagnot());
 		bs.setNumk(cds.getDrawNumk());
+
 		return Response.ok(BonusSetDTO.getInstance().event(bs).sucess("")).build();
 	}
 
@@ -1595,6 +1647,7 @@ public class Controller {
 		JSONObject ob = new JSONObject();
 
 		try {
+
 			Partner p = null;
 			GameCycleDto mdto;
 			p = partnerservice.findById(coderace);
@@ -1619,6 +1672,7 @@ public class Controller {
 
 	@GetMapping("findmaxMisek/{coderace}")
 	public Response getMaxMisek(@PathVariable("coderace") String coderace) {
+
 		JSONObject ob = new JSONObject();
 		try {
 			Partner p = null;
@@ -1710,7 +1764,9 @@ public class Controller {
 
 	@GetMapping("jackpot/{coderace}/{m1}/{m2}")
 	public Response getjackpot(@PathVariable("coderace") String coderace, @PathVariable("m1") Long m1, @PathVariable("m2") Long m2) {
+
 		JSONObject ob = new JSONObject();
+
 		try {
 			Partner p = null;
 			p = partnerservice.findById(coderace);
@@ -1728,7 +1784,9 @@ public class Controller {
 
 	@PostMapping("ugamecycle/{coderace}")
 	public Response updateCycle(@RequestBody GameCycleDto gm, @PathVariable("coderace") String coderace) {
+
 		JSONObject ob = new JSONObject();
+
 		try {
 			Partner p = null;
 			p = partnerservice.findById(coderace);
@@ -1736,6 +1794,7 @@ public class Controller {
 
 
 			if (StringUtils.equals(gm.getJeu(), "K")) {
+
 				Jeu j = Jeu.K;
 
 				int nbe = gmcservice.updateArchive(gm.getCurr_percent(), gm.getDate_fin(), gm.getArchive(),
@@ -1755,9 +1814,88 @@ public class Controller {
    }
 
 	@PostMapping("gamecycle/{coderace}")
-	public Response createCycle(@RequestBody GameCycleDto gm, @PathVariable("coderace") String coderace) {
-		JSONObject ob = new JSONObject();
+	public ResponseEntity<ApiResponse> createCycle(@RequestBody GameCycleDto gm, @PathVariable("coderace") String coderace) {
+
+		List<GameCycleDto> lcdto;
+
 		try {
+
+			// Recherche de l'existence du partenaire
+
+			Partner p = partnerservice.findById(coderace);
+			if(p == null) {
+
+				return controllerUtils
+						.getResponse(ApiResponse.builder().success(false).status(HttpStatus.PRECONDITION_FAILED)
+								.message(EtatMise.UNKNOWPARTNER.value()).build());
+
+			}
+
+			// Recherche des dernières lignes de turnover
+			List<GameCycle> lm = gmcservice.find(p);
+			lcdto = new ArrayList<>(lm.size());
+			GameCycleDto mdto;
+
+			for (GameCycle m : lm) {
+				mdto = new GameCycleDto();
+				mdto = mdto.transToGameCycle(m);
+				lcdto.add(mdto);
+			}
+
+			// Recherche du max id des tickets placés pour le partenaire
+			Long maxIdMisek = mskservice.ifindId(p);
+
+			// Recherche de la somme des mises
+			Optional<GameCycleDto> optionalGameCycle = lcdto.stream().findFirst();
+			GameCycleDto gmto = null;
+			if(optionalGameCycle.isPresent()) {
+				gmto = optionalGameCycle.get();
+			}
+
+			List<Misek> totalmisek;
+
+			if(gmto != null) {
+
+				totalmisek = mskservice.getMiseKCycle(gmto.getMise(), 1+maxIdMisek, p);
+				double sumWin = totalmisek.stream().mapToDouble(Misek::getSumWin).sum();
+				double sumMise = totalmisek.stream().mapToDouble(Misek::getSumMise).sum();
+				double currPercent = sumWin/sumMise;
+
+				currPercent = (double)((int)(currPercent*100))/100;
+				sumWin = (double)((int)(sumWin*100))/100;
+				sumMise = (double)((int)(sumMise*100))/100;
+
+				// Recherche du montant de jackpot
+
+				Misek misk1 = mskservice.searchMiseK(gmto.getMise());
+				Misek misk2 = mskservice.searchMiseK(maxIdMisek);
+				double jkpt = 0;
+
+				if(misk1 != null && misk2 != null) {
+
+					long k1 = Integer.parseInt(String.valueOf(misk1.getKeno().getIdKeno()));
+					long k2 = Integer.parseInt(String.valueOf(misk2.getKeno().getIdKeno()));
+					jkpt = kenoservice.findTotalBonusAmount(k1, k2, p);
+					jkpt = (double)((int)(jkpt*100))/100;
+
+				}
+
+				GameCycleDto gmt = new GameCycleDto();
+				gmt.setCurr_percent(currPercent);
+				gmt.setDate_fin(DateFormatUtils.format(new Date(), "dd-MM-yyyy,HH:mm"));
+				gmt.setArchive(1);
+				gmt.setPartner(p.getIdpartner());
+				gmt.setJeu(Jeu.K.getValue());
+				gmt.setMisef(maxIdMisek);
+				gmt.setStake(sumMise);
+				gmt.setPayout(sumWin);
+				gmt.setJkpt(jkpt);
+
+				gmcservice.updateArchive(gmt.getCurr_percent(), gmt.getDate_fin(), gmt.getArchive(),
+						p, Jeu.K, gmt.getMisef(), gmt.getStake(), gmt.getPayout(), gmt.getJkpt());
+
+			}
+
 			GameCycle gmc = new GameCycle();
 			gmc.setPercent(gm.getPercent());
 			gmc.setTour(gm.getTour());
@@ -1767,36 +1905,35 @@ public class Controller {
 			gmc.setArrangement(gm.getArrangement());
 			gmc.setDate_fin(gm.getDate_fin());
 			gmc.setJeu(Jeu.K);
-			gmc.setJkpt(gm.getJkpt());
-			gmc.setMise(gm.getMise());
-			gmc.setMisef(gm.getMisef());
-			gmc.setPosition(gm.getPosition());
+			gmc.setMise(maxIdMisek);
+			gmc.setMisef(maxIdMisek);
+			gmc.setPosition(0);
 			gmc.setRefundp(0);
-
-			ControlDisplayKeno cds = Utile.display_draw.get(coderace);
-			cds.setRefill(0);
-			Utile.display_draw.put(coderace, cds);
-
-			Partner p = null;
-			// System.out.println("cyle add coderace "+coderace);
-			p = partnerservice.findById(coderace);
 			gmc.setPartner(p);
 
 			boolean resp = gmcservice.create(gmc);
-			// System.out.println("cyle add "+resp);
 
-			if (resp) {
-				ob.put("resp", resp);
-				String eve = Utile.convertJsonToString(ob);
-				return Response.ok(ResponseData.getInstance().event(eve).sucess("")).build();
-			} else {
-				return Response.ok(ResponseData.getInstance().error("")).build();
+			if(resp) {
+				ControlDisplayKeno cds = Utile.display_draw.get(coderace);
+				cds.setRefill(0);
+				Utile.display_draw.put(coderace, cds);
+
+				mdto = new GameCycleDto();
+				mdto = mdto.transToGameCycle(gmc);
+				lcdto.add(0, mdto);
+
+				return controllerUtils.getResponse(ApiResponse.builder().data(lcdto).build());
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Response.ok(ResponseData.getInstance().error(e.getMessage())).build();
+			return controllerUtils
+					.getResponse(ApiResponse.builder().success(false).status(HttpStatus.INTERNAL_SERVER_ERROR)
+							.message("ERREUR SERVEUR").build());
 		}
+
+		return controllerUtils.getResponse(ApiResponse.builder().data(lcdto).build());
+
    }
 
 	@GetMapping("miset/{coderace}/{t1}/{t2}")
@@ -1954,16 +2091,13 @@ public class Controller {
 	public Response createCagnotte(@RequestBody CagnotteDto gm, @PathVariable("coderace") String coderace) {
 
 		try {
-			Partner p = null;
+
 			Cagnotte gmt = new Cagnotte();
-			p = partnerservice.findById(coderace);
+			Partner p = partnerservice.findById(coderace);
 			if (p == null) return Response.ok(CagnotteDTO.getInstance().error("NOT FOUND")).build();
 
-			Date cagnotDate = formatter.parse(gm.getHeur());
-			gm.setPartner(p);
 
-			gmt.setCreatedAt(new Date());
-			gmt.setDay(cagnotDate);
+			gmt.setDay(DateUtil.format(gm.getHeur(), DateUtil.DATE_HOUR_FORMAT_MOMO));
 			gmt.setLot(gm.getLot());
 			gmt.setPartner(p);
 			List<Cagnotte> listCagnots = cagnotservice.findAllPendingCagnotte(p);
@@ -2012,6 +2146,7 @@ public class Controller {
 
 	@GetMapping("bonus/{coderace}")
 	public Response getBonus(@PathVariable("coderace") String coderace) {
+
 		JSONObject ob = new JSONObject();
 
 		try {

@@ -13,7 +13,7 @@ import com.pyramid.dev.model.Miset;
 import com.pyramid.dev.model.Partner;
 
 public interface MisekDAO {
-	boolean create(Misek misek) throws DAOException;
+	Misek create(Misek misek) throws DAOException;
 	Misek find(String login, String pass) throws DAOException;
 	boolean update(Misek misek) throws DAOException;
 	boolean delete(Misek misek) throws DAOException;

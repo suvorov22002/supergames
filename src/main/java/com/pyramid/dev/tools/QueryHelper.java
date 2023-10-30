@@ -146,7 +146,8 @@ public class QueryHelper {
 			+ "(From Caissier Where partner=:partner)";
 	public static final String SQL_F_MAX_PARTNER_ID = "SELECT MAX(idMiseK) FROM Misek WHERE miset=:miset ";
 	public static final String SQL_U_COMPTA = "Update  Misek Set archive = 1 WHERE  caissier =:caissier AND  heureMise BETWEEN :heur1 AND :heur2 AND archive = 0 ";
-	
+
+	public  static final String SQL_F_MISEK_TICKET = "FROM Misek WHERE numeroTicket =:numeroTicket Order by idMiseK Desc ";
 	/* MisetDAO queries */
 	
 	public static final String SQL_F_MISET_MAX_ID = "SELECT MAX(idMiseT) FROM Miset Where coderace =:coderace";

@@ -140,11 +140,12 @@ public class CaissierDAOImpl implements CaissierDAO {
 
 	@Override
 	public Caissier findByLogin(String login) throws DAOException {
+
 		Session currentSession = sessionFactory.getCurrentSession();
 		Caissier cais = null;
-		Query<Caissier> query = currentSession.createQuery(QueryHelper.SQL_F_LOGIN_PASS, Caissier.class);
+		Query<Caissier> query = currentSession.createQuery(QueryHelper.SQL_F_LOGIN, Caissier.class);
 		query.setParameter("loginC", login);
-		//Caissier cais = query.getSingleResult();
+
 		Optional<Caissier> q = query.uniqueResultOptional();
 		if (q.isPresent()) {
 			cais = q.get();

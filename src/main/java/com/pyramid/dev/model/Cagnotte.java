@@ -2,11 +2,12 @@ package com.pyramid.dev.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pyramid.dev.enums.Room;
+import com.sun.istack.NotNull;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
-
 
 
 @Entity
@@ -25,7 +26,7 @@ public class Cagnotte implements Serializable {
 
 	@JsonIgnore
 	@Column
-	private Date day;
+	private String day;
 
 	@Column
 	private String lot;
@@ -55,6 +56,8 @@ public class Cagnotte implements Serializable {
 
 	@JsonIgnore
 	@Column
+	@NotNull
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdAt;
 
 	@Transient
@@ -67,11 +70,11 @@ public class Cagnotte implements Serializable {
 		// TODO document why this constructor is empty
 	}
 
-	public Date getDay() {
+	public String getDay() {
 		return day;
 	}
 
-	public void setDay(Date day) {
+	public void setDay(String day) {
 		this.day = day;
 	}
 

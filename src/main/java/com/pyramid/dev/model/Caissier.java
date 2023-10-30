@@ -144,7 +144,7 @@ public class Caissier implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Caissier [loginc=" + loginc + ", statut=" + statut + ", partner=" + partner + ", profil=" + profil
+		return "Caissier [loginc=" + loginc + ", statut=" + statut + ", partner=" + partner
 				+ "]";
 	}
 	

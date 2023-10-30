@@ -107,6 +107,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>pyramid-games-services</finalName>
 	</build>
 
 </project>

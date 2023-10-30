@@ -4,6 +4,7 @@ import com.pyramid.dev.dao.CagnotteDAO;
 import com.pyramid.dev.exception.DAOException;
 import com.pyramid.dev.model.Cagnotte;
 import com.pyramid.dev.model.Partner;
+import com.pyramid.dev.tools.DateUtil;
 import com.pyramid.dev.tools.QueryHelper;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -30,7 +31,7 @@ public class CagnotteDAOImpl implements CagnotteDAO {
 			Session currentSession = sessionFactory.getCurrentSession();
 			Query<Cagnotte> query = currentSession.createQuery(QueryHelper.SQL_F_CAGNOTTE, Cagnotte.class);
 			query.setParameter("partner", p)
-					.setParameter("day", new Date());
+					.setParameter("day", DateUtil.format(new Date(), DateUtil.DATE_HOUR_FORMAT_MOMO));
 
 			cagnotte = query.getResultList();
 

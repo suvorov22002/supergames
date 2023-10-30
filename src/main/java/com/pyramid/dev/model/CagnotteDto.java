@@ -1,7 +1,10 @@
 package com.pyramid.dev.model;
 
-import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 public class CagnotteDto implements Serializable {
 	
@@ -11,7 +14,7 @@ public class CagnotteDto implements Serializable {
 	@JsonIgnore
 	private static final long serialVersionUID = 1L;
 	
-	private String heur;
+	private Date heur;
 	private String lot;
 	private String jeu;
 	private Partner partner;
@@ -22,11 +25,11 @@ public class CagnotteDto implements Serializable {
 		super();
 	}
 
-	public String getHeur() {
+	public Date getHeur() {
 		return heur;
 	}
 
-	public void setHeur(String heur) {
+	public void setHeur(Date heur) {
 		this.heur = heur;
 	}
 

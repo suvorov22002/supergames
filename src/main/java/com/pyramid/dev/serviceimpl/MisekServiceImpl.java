@@ -27,7 +27,7 @@ public class MisekServiceImpl implements MisekService {
 	MisekDAO misekdao;
 	
 	@Override
-	public boolean create(Misek misek) throws DAOException {
+	public Misek create(Misek misek) throws DAOException {
 		return misekdao.create(misek);
 	}
 

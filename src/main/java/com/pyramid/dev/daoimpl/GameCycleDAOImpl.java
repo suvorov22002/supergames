@@ -38,6 +38,7 @@ public class GameCycleDAOImpl implements GameCycleDAO {
 		Session currentSession = sessionFactory.getCurrentSession();
 		Query<GameCycle> query = currentSession.createQuery(QueryHelper.SQL_F_GAMECYCLE, GameCycle.class);
 		query.setParameter("partner", partner);
+		query.setMaxResults(30);
 
 		return query.getResultList();
 	}
@@ -115,7 +116,9 @@ public class GameCycleDAOImpl implements GameCycleDAO {
 	@Override
 	public int updateArchive(double percent, String date, int archive, Partner partner, Jeu jeu, long misef,
 							 double stake, double payout, double jkpt) throws DAOException {
+
 		Session currentSession = sessionFactory.getCurrentSession();
+
 		return currentSession.createQuery(QueryHelper.SQL_U_GAMECYCLE_ARCHIVE)
 				.setParameter("curr_percent",percent)
 				.setParameter("id", partner)
